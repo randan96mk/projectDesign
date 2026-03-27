@@ -506,15 +506,17 @@ Epic: Campaign Orchestration Platform Build
 | Component | Technology |
 |-----------|-----------|
 | Intake Forms & Project Management | Adobe Workfront |
-| Data & Lookup Management | Workfront Planning |
-| Automation & Integration Layer | Workfront Fusion |
-| Custom Logic & Scripts | Adobe I/O (JavaScript Actions) |
+| Data, Lookup Management & Enrichment | Workfront Planning (with PL connections) |
+| Automation & Integration Layer | Workfront Fusion (7 scenarios) |
+| Custom Logic & Scripts | Adobe I/O JavaScript Actions (5 actions) |
+| Campaign Content JSON Document | Workfront Document (content.js, versioned) |
 | Middleware / API Gateway | SnapLogic |
 | Marketing Automation Platform | Adobe Marketo (MCZ) |
 | Legacy Lookup Source | Airtable (being migrated) |
-| Payload Format | JSON |
+| Payload Format | JSON (sync object, content.js, API responses) |
 | UI Design Reference | Miro |
 | Taxonomy Reference | SharePoint Excel |
+| SFDC Integration | Salesforce (via tracking IDs in sync object) |
 
 ---
 
@@ -531,11 +533,17 @@ Epic: Campaign Orchestration Platform Build
 ## Definition of Done (Platform-Level)
 
 - [ ] All intake forms (APAC, AMER) dynamically render fields per conditional logic
-- [ ] Existing fields reused without duplication
-- [ ] Taxonomy documented, reviewed, and approved
-- [ ] All Fusion scenarios tested end-to-end
-- [ ] Planning tables populated and validated
-- [ ] Adobe I/O scripts tested in staging
-- [ ] MCZ payloads successfully processed via SnapLogic
+- [ ] CTA content sections render correctly for Single CTA and Multi CTA (up to CTA 5)
+- [ ] SFDC tracking checkbox correctly triggers ops project task via Fusion
+- [ ] Existing fields reused without duplication; taxonomy documented and approved
+- [ ] All 7 Fusion scenarios tested end-to-end
+- [ ] All 5 Adobe I/O actions tested with JSON input/output validation
+- [ ] content.js correctly created and versioned as Workfront Document on Content task
+- [ ] Planning request table populated with parent/child linking and PL enrichment verified
+- [ ] All lookup tables (Solutions, Industry, POI, Team, Validation Rules, Messages, MCZ Taxonomy, Tokens, Program Shell) migrated from Airtable and validated
+- [ ] PL connections verified: enrichment flows automatically on field value changes
+- [ ] MCZ pre-sync review cycle tested (build → review → correction → resubmit → approve)
+- [ ] MCZ payloads successfully processed via SnapLogic; MCZ programs provisioned in Marketo
+- [ ] SnapLogic response processed; QA task set In Progress; MCZ links written to projects
 - [ ] Stakeholder acceptance obtained for each feature
 - [ ] All components deployed to production
