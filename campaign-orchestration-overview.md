@@ -78,7 +78,64 @@ When **Option 3** is selected, the form renders all existing targeting criteria 
 | 1 | Provide Content Later | Task added to timeline; content added post-submission |
 | 2 | Copy from Last Request | Copies content from most recent matching request; task marked complete |
 | 3 | Use Content from Specific Request | Requires Request ID input; content copied; task marked complete |
-| 4 | Add Content Now | Renders CTA Type (Single/Multi), Number of CTAs (2–7 for Multi), and dynamic content sections per CTA |
+| 4 | Add Content Now | Renders CTA Type (Single/Multi), Number of CTAs (2–5 for Multi), and dynamic content sections per CTA |
+
+---
+
+### 4a. Add Content Now – Detailed Field Structure
+
+When the marketer selects **"Add content now"**, the following fields are rendered dynamically:
+
+**CTA Configuration:**
+- **CTA Type** — Single CTA (default) / Multi CTA
+- **Number of CTAs** — Dropdown (2, 3, 4, 5); shown only when Multi CTA is selected; default = 2
+
+**Base Content Fields (always shown when "Add content now" is selected):**
+
+| Field Label | Field Type | Description |
+|-------------|------------|-------------|
+| Subject Line | Open text | Email subject line |
+| Preview Text | Open text | Inbox preview text |
+| Email Call-to-Action Text | Open text | Main CTA button label |
+| Email Call-to-Action URL | Open text | URL for the main CTA |
+| Email Headline | Open text | Email headline text |
+| Email Banner Image | Open text (URL) | URL for banner image in email header |
+| Email Body | Rich text editor | Main email body content |
+| Content Image | Open text (URL) | Image URL within email body content area |
+
+**Additional CTA Sections (dynamically rendered based on CTA count selection):**
+
+Each additional CTA section (CTA 2 through CTA 5) contains:
+
+| Field Label | Field Type |
+|-------------|------------|
+| CTA N Email Headline | Open text |
+| CTA N Email Body | Rich text editor |
+| CTA N Email Call-to-Action Text | Open text |
+| CTA N Email Call-to-Action URL | Open text |
+| CTA N Content Image | Open text (URL) |
+
+Maximum supported: **CTA 5** (5 total CTAs for Multi CTA type).
+
+---
+
+### 4b. Salesforce Campaign ID Tracking
+
+A checkbox field is displayed on the intake form:
+
+> **"Do you require Salesforce Campaign ID Creation as part of this request?"**
+
+- When **unchecked**: no additional tracking action is taken
+- When **checked**: Fusion scenario automatically adds a dedicated **SFDC Campaign Tracking task** to the operations project. The operations team fills in the following tracking values within that task, which are then consumed during sync object generation:
+
+| Field | Description |
+|-------|-------------|
+| Salesforce Campaign ID (s_rtid) | External SFDC tracking ID in the CTA URL |
+| Internal SFDC ID (s_iid) | Internal Salesforce campaign identifier |
+| Gated / Ungated | Content gate status |
+| Button Type | CTA button type (e.g., Button, Text Link) |
+
+These values are resolved per-CTA URL during MCZ sync object generation.
 
 ---
 
@@ -97,16 +154,107 @@ Automated integration layer responsible for:
 
 ### 6. Workfront Planning Tables
 
-Workfront Planning acts as the campaign data and lookup management layer:
+Workfront Planning acts as the campaign data, lookup management, and enrichment layer. Tables are connected via **PL (Planning Link) connections** so that selecting a value in the request table automatically enriches adjacent fields from the linked lookup table.
 
-| Table | Purpose |
-|-------|---------|
-| Campaign Request Data | Stores structured campaign request data from intake forms |
-| Validation Rules | Stores campaign validation rules used during request processing |
-| Interactive Message Templates | Stores dynamic message templates with placeholders (e.g., `{Name}`, `{CampaignID}`) |
-| MCZ Taxonomy Lookup | Stores MCZ shells, folders, tokens, and programs for Marketo provisioning |
+#### 6a. Campaign Request Data Table (Core Table)
 
-Existing Airtable lookup tables are migrated into Workfront Planning as part of this initiative.
+Stores structured intake request data and serves as the central record for campaign orchestration.
+
+| Field | Description |
+|-------|-------------|
+| Request ID | Unique Workfront request identifier |
+| Parent Request ID | Set when this record is a child (additional-language) request |
+| Child Request IDs | List of linked child requests for this parent campaign |
+| Region | APAC / AMER |
+| Sub-Region | Filtered by region |
+| Country | Filtered by sub-region |
+| Requesting Team | Team submitting the request |
+| Campaign Type | Single CTA / Multi CTA |
+| CTA Count | Number of CTAs (1–5) |
+| Targeting Option | Options 1–4 |
+| Content Option | Options 1–4 |
+| Send Date | Campaign send date |
+| Solution | Linked to Solutions lookup table via PL connection |
+| Industry | Linked to Industry lookup table via PL connection |
+| POI (Product of Interest) | Specific Adobe product targeted; linked via PL connection; used for token and program shell naming |
+| Team Code | Linked to Team lookup table via PL connection |
+| Content Document ID | Workfront Document ID of the `content.js` JSON file attached to the Content task |
+| Sync Object Document ID | Workfront Document ID of the MCZ sync object JSON file |
+| Marketer Project ID | Linked Workfront marketer project |
+| Operations Project ID | Linked Workfront operations project |
+| Status | Current campaign lifecycle status |
+| SFDC Tracking Required | Boolean flag from intake form checkbox |
+
+**PL Connection Enrichment:** When Solution, Industry, POI, or Team is set/updated, the PL connections pull enriched attributes (e.g., solution abbreviation, POI token prefix, team routing code) from the respective lookup tables automatically.
+
+#### 6b. Solutions Lookup Table
+Stores solution definitions used across campaigns.
+
+| Field | Description |
+|-------|-------------|
+| Solution ID | Unique ID |
+| Solution Name | Full name (e.g., Adobe Experience Cloud) |
+| Solution Abbreviation | Short code used in token and program naming |
+| Region Applicability | Applicable regions |
+
+#### 6c. Industry Lookup Table
+Stores industry vertical definitions for targeting enrichment.
+
+#### 6d. POI (Product of Interest) Lookup Table
+Stores specific Adobe products targeted by campaigns. POI values are used during token construction and MCZ program shell selection.
+
+#### 6e. Team Lookup Table
+Stores team definitions including routing codes used by Fusion scenario routing logic.
+
+#### 6f. Validation Rules Lookup Table
+
+| Field | Description |
+|-------|-------------|
+| Rule ID | Unique rule identifier |
+| Rule Name | Descriptive name |
+| Rule Type | Field validation / completeness / compliance |
+| Validation Logic | Condition expression |
+| Error Message | Message shown when rule fails |
+| Severity | Error / Warning / Info |
+| Region Scope | APAC / AMER / EMEA / Global |
+| Active Flag | Enable/disable rule |
+
+#### 6g. Interactive Message Templates Lookup Table
+
+Stores reusable automated message templates with dynamic placeholders used in Issues, Projects, and Tasks.
+
+Placeholders include: `{Name}`, `{CampaignID}`, `{Region}`, `{SendDate}`, `{MCZLink}`, `{ValidationStatus}`
+
+#### 6h. MCZ Taxonomy Lookup Table (Shells, Folders)
+
+Stores MCZ program infrastructure definitions used during provisioning.
+
+| Field | Description |
+|-------|-------------|
+| Shell ID | Unique shell identifier |
+| Shell Name | MCZ program shell template name |
+| Region | Mapped region |
+| Campaign Type | Single CTA / Multi CTA |
+| Solution | Linked to Solutions lookup |
+| POI | Linked to POI lookup |
+| Folder Path | Target folder path in Marketo |
+| Token Set Reference | Linked to Tokens lookup table |
+
+#### 6i. Tokens Lookup Table
+
+Stores Marketo token definitions used in sync object generation.
+
+| Field | Description |
+|-------|-------------|
+| Token Name | Marketo token name (e.g., `{{my.emailSubjectLine}}`) |
+| Token Type | Program-level / Folder / Content |
+| Default Value | Default if campaign value is not set |
+| Campaign Field Mapping | Which campaign field supplies the value |
+| Solution Applicability | Applicable solutions |
+
+#### 6j. Program Shell Table
+
+Stores dynamically selectable program shell templates for MCZ provisioning, mapped by Solution + POI + Region + Campaign Type combinations.
 
 ---
 
