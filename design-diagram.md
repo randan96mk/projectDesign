@@ -317,42 +317,54 @@
 ## Project Template Structure
 
 ```
-  ┌───────────────────────────────────────────────────┐
-  │        MARKETER CAMPAIGN PROJECT TEMPLATE         │
-  ├───────────────────────────────────────────────────┤
-  │  Phase 1: Campaign Intake & Governance            │
-  │  ├── Email Governance Review Task                 │
-  │  │     └── [Form Attached: Governance Checklist]  │
-  │  └── Targeting & Content Confirmation Task        │
-  │                                                   │
-  │  Phase 2: Campaign Setup                          │
-  │  ├── Targeting Criteria Task                      │
-  │  │     └── [Form: Region-specific Targeting]      │
-  │  └── Content Task                                 │
-  │        └── [Form: CTA Content Fields]             │
-  │                                                   │
-  │  Phase 3: Review & Approval                       │
-  │  └── Stakeholder Review Task                      │
-  └───────────────────────────────────────────────────┘
+  +-----------------------------------------------------------------------+
+  |              MARKETER CAMPAIGN PROJECT TEMPLATE                       |
+  |          (separate templates: Single CTA / Multi CTA)                 |
+  +-----------------------------------------------------------------------+
+  |                                                                       |
+  |  Phase 1: Campaign Intake and Governance                              |
+  |  +--> Email Governance Task    [triggers Ops project creation on done]|
+  |  +--> Targeting Criteria Task  [form: region-specific targeting]      |
+  |                                                                       |
+  |  Phase 2: Campaign Content                                            |
+  |  +--> Content Task             [form: CTA content fields]             |
+  |  |     +--> content.js JSON document attached here (versioned)        |
+  |  |     +--> overview summary and validation summary printed here      |
+  |  +--> [Language Task 1]        [for net-language child requests]      |
+  |  +--> [Language Task 2]        [additional language if submitted]     |
+  |                                                                       |
+  |  Phase 3: Overview and Validation                                     |
+  |  +--> Overview Build Task      [set In Progress by Fusion on change]  |
+  |  +--> Validation Summary Task  [updated by Adobe I/O on each change]  |
+  |                                                                       |
+  |  Automated owners assigned per region; start dates set by Fusion      |
+  +-----------------------------------------------------------------------+
 
-  ┌───────────────────────────────────────────────────┐
-  │        OPERATIONS PROJECT TEMPLATES               │
-  │        (Routing: Region × CTA Type)               │
-  ├───────────────────────────────────────────────────┤
-  │                                                   │
-  │  Template A: APAC – Single CTA                    │
-  │  Template B: APAC – Multi CTA                     │
-  │  Template C: AMER – Single CTA                    │
-  │  Template D: AMER – Multi CTA                     │
-  │  Template E: EMEA – Single CTA (reference)        │
-  │  Template F: EMEA – Multi CTA (reference)         │
-  │                                                   │
-  │  Each template contains:                          │
-  │  ├── Ops Setup Tasks                              │
-  │  ├── MCZ Provisioning Tasks                       │
-  │  ├── QA / Validation Tasks                        │
-  │  └── Launch & Post-Launch Tasks                   │
-  └───────────────────────────────────────────────────┘
+  +-----------------------------------------------------------------------+
+  |              OPERATIONS PROJECT TEMPLATES                             |
+  |              (Routing: Region x CTA Type = 4 templates)              |
+  +-----------------------------------------------------------------------+
+  |                                                                       |
+  |  Template A: APAC - Single CTA                                        |
+  |  Template B: APAC - Multi CTA                                         |
+  |  Template C: AMER - Single CTA                                        |
+  |  Template D: AMER - Multi CTA                                         |
+  |                                                                       |
+  |  Each template contains:                                              |
+  |  Phase 1: Overview and Setup                                          |
+  |  +--> Campaign Overview Summary task  [auto-written by Adobe I/O]     |
+  |  +--> [SFDC Tracking task]            [added by Fusion if flag set]   |
+  |                                                                       |
+  |  Phase 2: Pre-Sync MCZ Review                                         |
+  |  +--> Ops Email Summary task          [completion triggers sync build]|
+  |  +--> MCZ-Pre-Sync Summary task       [MCZ details written here]      |
+  |  +--> Build task                      [set In Progress on approval]   |
+  |                                                                       |
+  |  Phase 3: Provisioning and QA                                         |
+  |  +--> SnapLogic Submission task       [triggered on Build task done]  |
+  |  +--> QA Task                         [set In Progress on MCZ success]|
+  |  +--> Post-Launch / Verification task [ops team verifies MCZ in Marketo]|
+  +-----------------------------------------------------------------------+
 ```
 
 ---
