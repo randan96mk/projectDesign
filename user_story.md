@@ -14,11 +14,13 @@
 **Title:** Configure standardized Workfront intake form for APAC email campaign requests
 
 **As a** Marketing Operations user in the APAC region,
-**I want** a dynamic and standardized intake form within the Enterprise Marketing & Operations Request Queue,
+**I want** a dynamic and standardized intake form within the Enterprise Marketing & Operations Request Queue — including a Send Date field above Targeting Criteria and APAC-specific targeting fields rendered when Region = APAC,
 **So that** I can submit complete, accurate, and region-consistent campaign requests aligned with global EMEA standards.
 
 **Feature:** Intake & Request Management
 **Task Reference:** Task 1
+
+> **Design Note:** The APAC and AMER intake forms share the same solution design and form structure. Region-specific differences are limited to a subset of Targeting Criteria fields unique to each region. Send Date, content fields, and CTA sections are identical across both forms.
 
 ---
 
@@ -27,11 +29,13 @@
 **Title:** Configure standardized Workfront intake form for AMER email campaign requests
 
 **As a** Marketing Operations user in the AMER region,
-**I want** a dynamic and standardized intake form with region-specific fields (e.g., Enterprise GTM Segments) within the Enterprise Marketing & Operations Request Queue,
+**I want** a dynamic and standardized intake form with the Enterprise GTM Segments field (AMER-only), a Send Date field above Targeting Criteria, and AMER-specific targeting fields rendered when Region = AMER — all within the Enterprise Marketing & Operations Request Queue,
 **So that** I can submit consistent and complete campaign requests that align with EMEA global standards while accommodating AMER-specific requirements.
 
 **Feature:** Intake & Request Management
 **Task Reference:** Task 2
+
+> **Design Note:** Built from the same shared solution design as the APAC form. Only the region-specific Targeting Criteria fields (and the Enterprise GTM Segments field) differ.
 
 ---
 
@@ -63,11 +67,11 @@
 
 ### US-005: Dynamic Targeting Criteria – Add Targeting Now
 
-**Title:** Allow marketers to define targeting criteria inline during request submission
+**Title:** Allow marketers to define targeting criteria inline during request submission, with shared and region-specific fields rendered based on selected region
 
 **As a** marketer who wants full control over targeting from the start,
-**I want** to select "Add targeting criteria now" and have all region-specific targeting fields rendered inline (Simple or Detailed mode),
-**So that** I can provide complete and accurate targeting information upfront, enabling faster downstream processing and campaign comparison.
+**I want** to select "Add targeting criteria now" and have the targeting fields rendered inline — common fields shared across APAC and AMER, plus the small subset of region-specific targeting fields applicable to my selected region (Simple or Detailed mode),
+**So that** I can provide complete and accurate targeting information upfront without seeing irrelevant fields from other regions, enabling faster downstream processing and campaign comparison.
 
 **Feature:** Intake & Request Management
 **Task Reference:** Task 1, Task 2

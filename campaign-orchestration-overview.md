@@ -31,8 +31,11 @@ Standardized request forms built within the **Enterprise Marketing & Operations 
 - Reuse global EMEA field definitions to ensure cross-region consistency
 - Enforce taxonomy and naming conventions via a central reference document
 - Support four **Targeting Criteria** modes and four **Campaign Content** modes
+- Include a **Send Date** field (existing, validated across APAC/AMER/EMEA) positioned above Targeting Criteria
 
 **Queue Topic:** Enterprise Campaign Operations Requests (APAC / AMER)
+
+> **Solution Design Note:** The APAC and AMER intake forms share the **same solution design and form structure**. The only region-specific difference is in the **Targeting Criteria section** — a small subset of targeting fields are unique to each region (APAC-specific vs. AMER-specific), while all remaining fields (including Send Date, content sections, and CTA fields) are identical. Both forms are configured from a single shared design; region routing determines which targeting fields are rendered.
 
 ---
 
@@ -53,8 +56,9 @@ A marketer initiates a request by navigating to Workfront → Hamburger Menu →
 | 7 | Enterprise GTM Segments | Shown only when Region = AMER (existing field) |
 | 8 | Requesting Team | Dropdown (existing field) |
 | 9 | Request Type | Email Program (Batch) – existing field |
-| 10 | Targeting Criteria | Radio button – 4 options (conditional logic) |
-| 11 | Content Option | Radio button – 4 options (conditional logic) |
+| 10 | Send Date | Campaign send date selector – existing field, validated and reused across APAC and AMER; positioned above Targeting Criteria |
+| 11 | Targeting Criteria | Radio button – 4 options (conditional logic) |
+| 12 | Content Option | Radio button – 4 options (conditional logic) |
 
 ---
 

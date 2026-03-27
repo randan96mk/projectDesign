@@ -111,7 +111,18 @@
 ## Intake Form – Conditional Logic Flow
 
 ```
+  NOTE: APAC and AMER share the same form structure and solution design.
+        Only the Targeting Criteria section has region-specific fields.
+        All other fields (including Send Date and content sections) are identical.
+
   USER SELECTS: Request Type = Email Program (Batch)
+       │
+       ▼
+  ┌────────────────────────────────────────────────────────────────┐
+  │  SEND DATE                                                     │
+  │  Campaign send date selector                                   │
+  │  Existing field – reused across APAC and AMER without change   │
+  └────────────────────────────────────────────────────────────────┘
        │
        ▼
   ┌────────────────────────────────────────────────────────────────┐
@@ -125,7 +136,10 @@
   │           Copy targeting; Task marked complete                 │
   │                                                                │
   │  ○ Option 3: Add Targeting Now                                │
-  │      └──► Show all region targeting fields (APAC/AMER/EMEA)  │
+  │      └──► Show targeting fields for selected region:          │
+  │           Shared fields (APAC + AMER common targeting)        │
+  │           + APAC-specific fields  (if Region = APAC)          │
+  │           + AMER-specific fields  (if Region = AMER)          │
   │           Simple / Detailed toggle                             │
   │           Industry, Comments, Notes fields                     │
   │           Task marked complete                                 │
@@ -151,7 +165,7 @@
   │                                                                │
   │  ○ Option 4: Add Content Now                                  │
   │      └──► Show [CTA Type: Single / Multi]                     │
-  │           If Multi → Show [Number of CTAs: 2–7]               │
+  │           If Multi → Show [Number of CTAs: 2–5]               │
   │           Dynamically render content sections per CTA count   │
   │           Task validated                                       │
   └────────────────────────────────────────────────────────────────┘
