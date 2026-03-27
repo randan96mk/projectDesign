@@ -399,6 +399,231 @@
 
 ---
 
+### US-031: Content Task – JSON Document Attachment (content.js)
+
+**Title:** Generate and store campaign content as a structured JSON document attached to the Workfront content task
+
+**As a** campaign operations system,
+**I want** Adobe I/O to generate a structured `content.js` JSON file that captures all campaign content, lookup enrichment data, validation results, and overview summaries — and store it as a versioned document attachment under the marketer project's Content task,
+**So that** all campaign data is consolidated in one reference document that Fusion scenarios and Adobe I/O actions can read and update throughout the campaign lifecycle, compensating for Workfront Planning column field limitations.
+
+**Acceptance Notes:**
+- The file is created and updated as a Workfront Document on the Content task
+- Each update creates a new version of the document (versioned attachment)
+- Content is updated whenever marketer task values change (content addition, edits, language additions)
+- The JSON includes: intake content, CTA sections, lookup-enriched fields, validation summary, overview summary, sync object data
+
+**Feature:** Campaign Project Automation
+**Task Reference:** Task 5, Task 10, Task 12
+
+---
+
+### US-032: Planning Request Table – Parent/Child Net Language Request Linking
+
+**Title:** Link additional-language campaign requests as child records to the parent request in the Planning request table
+
+**As a** campaign operations system,
+**I want** the Workfront Planning request table to support parent and child request relationships — where the parent is the original campaign request (main language) and a child is a new intake request submitted for the same campaign in a different language, linked by selecting the existing marketer project during submission,
+**So that** all language variants of a campaign are tracked under one parent campaign record, content from each child request is automatically transferred to the corresponding language task in the existing marketer project, and the Planning table reflects the full multi-language scope of the campaign.
+
+**Acceptance Notes:**
+- Child request submission uses the standard intake form with an additional field to select the parent marketer project
+- Fusion scenario detects the parent project reference and routes content to the correct language task
+- The Planning request table stores both parent Request ID and child Request ID with relationship links
+- Document IDs (content.js, sync object) are tracked at the parent record level
+
+**Feature:** Intake & Request Management / Data & Lookup Management
+**Task Reference:** Task 3, Task 4, Task 12
+
+---
+
+### US-033: Planning Table Enrichment via PL Connections (Solution, Industry, POI, Team)
+
+**Title:** Automatically enrich Planning request table records using PL connections to lookup tables for solution, industry, POI, and team data
+
+**As a** campaign operations system,
+**I want** the Workfront Planning request table to be connected to lookup tables (Solution, Industry, Product of Interest, Team) via Planning Link (PL) connections,
+**So that** when a field value (e.g., Solution) is set or updated in the request table, the connected lookup table automatically supplies enriched attributes (e.g., solution abbreviation, POI tokens, team codes) that are then used during sync object and token generation — without requiring manual data entry.
+
+**Acceptance Notes:**
+- PL connections are established between the request table and each relevant lookup table
+- Example: selecting a Solution populates its abbreviation from the Solutions lookup table; this abbreviation is used in token construction during sync object generation
+- POI (Product of Interest) = specific Adobe product the campaign targets; used for token and program shell naming
+- Enrichment triggers automatically as and when content is added or updated in the request table
+
+**Feature:** Data & Lookup Management
+**Task Reference:** Task 6, Task 15, Task 16
+
+---
+
+### US-034: Program Shell Lookup Table for Dynamic MCZ Program Shell Generation
+
+**Title:** Create a Workfront Planning program shell lookup table to support dynamic Marketo program shell generation
+
+**As a** campaign operations system,
+**I want** a Workfront Planning table that stores program shell templates mapped by solution, region, campaign type, and POI,
+**So that** the MCZ sync object generation logic can dynamically select the correct program shell configuration for each campaign and construct the Marketo program provisioning payload accurately.
+
+**Acceptance Notes:**
+- Table contains: Shell ID, Shell Name, Region, Campaign Type (Single/Multi CTA), Solution, POI mapping, Folder Path, Token Set reference
+- Used by the Adobe I/O sync object generation action to resolve the correct shell for a given campaign
+- Replaces manual shell lookup previously done in Airtable
+
+**Feature:** MCZ Integration & Provisioning
+**Task Reference:** Task 15, Task 16
+
+---
+
+### US-035: Tokens Lookup Table in Workfront Planning
+
+**Title:** Create a Workfront Planning tokens lookup table to store Marketo token definitions
+
+**As a** campaign operations system,
+**I want** a dedicated Workfront Planning table that stores all Marketo token definitions including token names, default values, and their mapping to campaign fields,
+**So that** the Adobe I/O sync object generation action can dynamically populate token values from campaign request data and Planning enrichment, producing a complete and accurate token payload for Marketo provisioning.
+
+**Acceptance Notes:**
+- Tokens stored include: program-level tokens, folder tokens, content tokens, tracking tokens
+- Token values are resolved dynamically using enriched data from the request table and PL-connected lookup tables
+- Token table is referenced during sync object build by the Adobe I/O action
+
+**Feature:** MCZ Integration & Provisioning
+**Task Reference:** Task 15, Task 16
+
+---
+
+### US-036: SFDC Campaign ID Tracking Task in Operations Project
+
+**Title:** Automatically add a Salesforce Campaign ID tracking task to the operations project when SFDC ID creation is requested
+
+**As a** campaign operations system,
+**I want** the Fusion scenario to detect when the marketer has checked "Do you require Salesforce Campaign ID Creation as part of this request?" in the intake form and automatically add a dedicated SFDC Tracking task to the operations project,
+**So that** the operations team can supply the required Salesforce tracking IDs (s_rtid, s_iid), gated/ungated flag, and button type — which are then included in the sync object during MCZ provisioning.
+
+**Acceptance Notes:**
+- Checkbox on intake form triggers task creation in the operations project
+- SFDC Tracking task collects: Salesforce Campaign ID (rtid), Internal SFDC ID (s_iid), Gated/Ungated, Button Type
+- These values are consumed by the Adobe I/O sync object generation action before sending to SnapLogic
+- Task must be completed before the sync object build step can proceed
+
+**Feature:** MCZ Integration & Provisioning / Campaign Project Automation
+**Task Reference:** Task 14, Task 16
+
+---
+
+### US-037: Pre-Sync MCZ Details Review and Approval Cycle
+
+**Title:** Enable operations team review and iterative correction of MCZ details before final sync object submission
+
+**As a** campaign operations team member,
+**I want** to review the generated MCZ details (shells, folders, tokens, program structure) in the MCZ-Pre-Sync Summary task before the sync object is submitted to SnapLogic, and be able to request changes that trigger a regeneration cycle,
+**So that** any corrections to MCZ configuration are made and reviewed before an irreversible provisioning call is sent to Marketo via SnapLogic.
+
+**Acceptance Notes:**
+- On Ops email summary task completion → sync object is built → MCZ details are written to the MCZ-Pre-Sync Summary task
+- Operations team reviews; if changes needed → they update fields → Fusion/Adobe I/O detects update → MCZ details regenerated and posted back for re-review
+- When MCZ-Pre-Sync Summary task is marked complete → final overview summary is regenerated → Build task is set to In Progress
+- Build task completion → sync object document ID is submitted to SnapLogic API
+
+**Feature:** MCZ Integration & Provisioning
+**Task Reference:** Task 16, Task 17
+
+---
+
+### US-038: QA Task Initiation After MCZ Provisioning Success
+
+**Title:** Automatically set the QA task to In Progress in both the operations and marketer projects after successful MCZ provisioning
+
+**As a** campaign operations system,
+**I want** the Fusion watch event processing the SnapLogic response to detect a successful provisioning status and automatically set the QA task to In Progress in the operations project (and complete relevant tasks in both projects),
+**So that** the operations and marketing teams are immediately notified that MCZ provisioning is complete and the campaign is ready for quality assurance verification.
+
+**Acceptance Notes:**
+- Successful SnapLogic response → Workfront projects updated with MCZ program links (accessible URLs)
+- Specific tasks in both marketer and operations projects are marked complete
+- QA task in operations project is set to In Progress
+- Response data decoded by Adobe I/O action and written to both projects
+
+**Feature:** MCZ Integration & Provisioning / Campaign Project Automation
+**Task Reference:** Task 18
+
+---
+
+### US-039: Adobe I/O Action – Overview Build Script
+
+**Title:** Implement an Adobe I/O action to build and update the campaign request overview on the marketer project
+
+**As a** platform engineer,
+**I want** a standalone Adobe I/O JavaScript action that accepts the current campaign JSON object as input and generates a formatted request overview summary, updating it on the marketer project as a task note or description,
+**So that** the overview is always current and reflects any changes made to campaign task values — and Fusion does not need to contain this complex formatting logic.
+
+**Acceptance Notes:**
+- Triggered by Fusion as an Adobe I/O module call whenever any marketer project task value changes
+- Input: current content.js JSON object
+- Output: formatted HTML/text overview string written to the marketer project
+- Action runs independently and returns a JSON response
+
+**Feature:** Campaign Project Automation / Validation Framework
+**Task Reference:** Task 5, Task 12
+
+---
+
+### US-040: Adobe I/O Action – Validation Summary Script
+
+**Title:** Implement an Adobe I/O action to evaluate campaign request data against validation rules and generate a validation summary
+
+**As a** platform engineer,
+**I want** a standalone Adobe I/O JavaScript action that takes the campaign JSON object as input, evaluates it against all applicable validation rules from the Planning validation rules table, and returns a structured validation summary,
+**So that** incomplete or policy-violating campaign requests are flagged automatically and the summary is printed on the marketer project before any downstream provisioning activity begins.
+
+**Acceptance Notes:**
+- Triggered by Fusion whenever marketer task values change
+- Re-evaluates and re-executes on every relevant change
+- Input: content.js JSON + validation rules payload
+- Output: validation summary JSON (rule results, severity, pass/fail status) written to project
+
+**Feature:** Validation Framework
+**Task Reference:** Task 9
+
+---
+
+### US-041: Adobe I/O Action – Sync Object Build and MCZ Details Generation
+
+**Title:** Implement an Adobe I/O action to construct the MCZ sync object payload and generate MCZ provisioning details
+
+**As a** platform engineer,
+**I want** a standalone Adobe I/O JavaScript action that takes the campaign JSON object (including content, enriched lookup data, tokens, program shells) as input and produces a valid MCZ Sync Object JSON payload along with human-readable MCZ details,
+**So that** the sync object is built using complex logic that cannot be replicated in Fusion natively, and the MCZ details can be reviewed by the operations team before submission to SnapLogic.
+
+**Acceptance Notes:**
+- Input: content.js JSON, token data, program shell reference, SFDC tracking IDs (if applicable)
+- Output: MCZ Sync Object JSON (stored as Workfront document with tracked ID in Planning) + MCZ details text written to MCZ-Pre-Sync Summary task
+- Document ID of the sync object JSON is recorded in the Planning request table
+
+**Feature:** MCZ Integration & Provisioning
+**Task Reference:** Task 16
+
+---
+
+### US-042: Adobe I/O Action – SnapLogic Response Processor
+
+**Title:** Implement an Adobe I/O action to decode and process the SnapLogic provisioning response
+
+**As a** platform engineer,
+**I want** a standalone Adobe I/O JavaScript action that takes the SnapLogic response JSON (returned as a new version of the same sync object document) as input, decodes the provisioning status and MCZ program details, and returns structured update instructions,
+**So that** Fusion can apply the decoded results to update both the marketer and operations projects with MCZ links, task completion statuses, and QA readiness flags — without embedding this decoding logic in Fusion itself.
+
+**Acceptance Notes:**
+- Triggered by Fusion's SnapLogic response watch event when the sync object document is updated with a new version
+- Input: SnapLogic response JSON
+- Output: structured JSON with MCZ program URL, status (success/failure), task update instructions, QA flag
+- Fusion uses the output to apply updates to Workfront projects and planning tables
+
+**Feature:** MCZ Integration & Provisioning
+**Task Reference:** Task 18
+
+---
+
 ## Summary Table
 
 | Story ID | Feature | Title |
@@ -433,3 +658,15 @@
 | US-028 | Intake & Request Management | Test Queue Validation Before Production Deployment |
 | US-029 | Intake & Request Management | Cross-Region Targeting Criteria Standardization |
 | US-030 | Validation / MCZ Integration | Adobe I/O Scripts for Business Logic Execution |
+| US-031 | Campaign Project Automation | Content Task – JSON Document Attachment (content.js) |
+| US-032 | Intake & Request Management | Planning Request Table – Parent/Child Net Language Request Linking |
+| US-033 | Data & Lookup Management | Planning Table Enrichment via PL Connections (Solution, Industry, POI, Team) |
+| US-034 | MCZ Integration & Provisioning | Program Shell Lookup Table for Dynamic MCZ Generation |
+| US-035 | MCZ Integration & Provisioning | Tokens Lookup Table in Workfront Planning |
+| US-036 | MCZ Integration & Provisioning | SFDC Campaign ID Tracking Task in Operations Project |
+| US-037 | MCZ Integration & Provisioning | Pre-Sync MCZ Details Review and Approval Cycle |
+| US-038 | MCZ Integration & Provisioning | QA Task Initiation After MCZ Provisioning Success |
+| US-039 | Campaign Project Automation | Adobe I/O Action – Overview Build Script |
+| US-040 | Validation Framework | Adobe I/O Action – Validation Summary Script |
+| US-041 | MCZ Integration & Provisioning | Adobe I/O Action – Sync Object Build and MCZ Details Generation |
+| US-042 | MCZ Integration & Provisioning | Adobe I/O Action – SnapLogic Response Processor |
