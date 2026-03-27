@@ -360,32 +360,192 @@
 ## Fusion Scenario Trigger Map
 
 ```
-  ┌──────────────────────────────────────────────────────────────────────────┐
-  │                    WORKFRONT FUSION SCENARIO TRIGGERS                    │
-  ├──────────────────────┬───────────────────────────────────────────────────┤
-  │  Scenario            │  Trigger Condition                                │
-  ├──────────────────────┼───────────────────────────────────────────────────┤
-  │  S1: Intake          │  New Request created                              │
-  │  Processing          │  Queue = Enterprise Mktg & Ops                    │
-  │                      │  Type = Email Program (Batch)                     │
-  │                      │  Region = APAC or AMER                            │
-  ├──────────────────────┼───────────────────────────────────────────────────┤
-  │  S2: Marketer        │  S1 completes successfully                        │
-  │  Project Creation    │  Request validated                                 │
-  ├──────────────────────┼───────────────────────────────────────────────────┤
-  │  S3: Email Gov       │  Watch Event: Task Status = Complete              │
-  │  Watch Event         │  Task Name = "Email Governance"                   │
-  │                      │  Project = Marketer Campaign Project              │
-  ├──────────────────────┼───────────────────────────────────────────────────┤
-  │  S4: Ops Project     │  S3 watch event fires                             │
-  │  Creation            │  Routing logic evaluates:                         │
-  │                      │  Region + Team + CTA Type                         │
-  ├──────────────────────┼───────────────────────────────────────────────────┤
-  │  S5: SnapLogic       │  MCZ Sync Object generated                        │
-  │  API Invocation      │  Ops Project provisioning task triggered          │
-  ├──────────────────────┼───────────────────────────────────────────────────┤
-  │  S6: SnapLogic       │  Watch for document update in Workfront           │
-  │  Response Watch      │  SnapLogic response field populated               │
-  │                      │  Process success/failure status                   │
-  └──────────────────────┴───────────────────────────────────────────────────┘
+  ┌────────────────────────────────────────────────────────────────────────────────────┐
+  │                         WORKFRONT FUSION SCENARIO TRIGGERS                         │
+  ├─────────────────────────────┬──────────────────────────────────────────────────────┤
+  │  Scenario                   │  Trigger Condition                                   │
+  ├─────────────────────────────┼──────────────────────────────────────────────────────┤
+  │  S1: Intake Processing      │  New Request created                                 │
+  │                             │  Queue = Enterprise Mktg & Ops                       │
+  │                             │  Type = Email Program (Batch)                        │
+  │                             │  Region = APAC or AMER                               │
+  ├─────────────────────────────┼──────────────────────────────────────────────────────┤
+  │  S2: Marketer Project       │  S1 completes successfully                           │
+  │  Creation                   │  Request data validated                              │
+  ├─────────────────────────────┼──────────────────────────────────────────────────────┤
+  │  S3: Task Change Watcher    │  Watch Event: Task value updated                     │
+  │  (Continuous)               │  Within a Marketer Campaign Project                  │
+  ├─────────────────────────────┼──────────────────────────────────────────────────────┤
+  │  S4: Email Governance       │  Watch Event: Task Status = Complete                 │
+  │  Task Watch                 │  Task Name = "Email Governance Task"                 │
+  │                             │  Project = Marketer Campaign Project                 │
+  ├─────────────────────────────┼──────────────────────────────────────────────────────┤
+  │  S5: Ops Project            │  Triggered from S2 (in parallel)                     │
+  │  Creation                   │  Routing: Region + Team + CTA Type                   │
+  │                             │  SFDC flag checked -> adds SFDC Tracking task        │
+  ├─────────────────────────────┼──────────────────────────────────────────────────────┤
+  │  S6: Sync Object Build      │  Ops Email Summary task complete in Ops project      │
+  │  + SnapLogic API Call       │  MCZ review cycle -> Pre-Sync task complete          │
+  │                             │  Build task complete -> sends Document ID to Snaplogic│
+  ├─────────────────────────────┼──────────────────────────────────────────────────────┤
+  │  S7: SnapLogic Response     │  Watch Event: Sync object document updated           │
+  │  Watch + Processing         │  with new version (SnapLogic response payload)       │
+  │                             │  Decode -> update projects -> QA task In Progress    │
+  └─────────────────────────────┴──────────────────────────────────────────────────────┘
+```
+
+---
+
+## End-to-End Fusion and Adobe I/O Orchestration Flow
+
+```
+  [REQUEST SUBMIT]
+       |
+       v
+  S1: Watch Event --> Filter (APAC/AMER, Email Batch)
+       |
+       +---> Adobe I/O: overview-build --> initial overview written to request
+       +---> Planning: Request Table record created
+       |
+       v
+  S2: Marketer Project Creation
+       |
+       +---> Select template (Single CTA / Multi CTA)
+       +---> Create project --> assign team/owner --> set start date
+       +---> Transfer intake form data --> marketer project task forms
+       +---> If content provided: copy content fields to Content task
+       +---> Adobe I/O: content.js generated --> stored as WF Document on Content task
+       |         +--> Document ID saved to Planning Request Table
+       +---> Adobe I/O: validation-summary --> validation results on marketer project
+       |
+       |  [If child/net-language request: route to existing marketer project language task]
+       |
+       +--> (parallel) S5: Ops Project Creation
+                 +---> Select ops template (region x CTA type)
+                 +---> Create ops project --> assign ops team
+                 +--> If SFDC flag: add SFDC Tracking task to ops project
+
+  ------------------------- CONTINUOUS LOOP -----------------------------------------
+  S3: Task Change Watcher (fires on any marketer task update)
+       +---> Adobe I/O: overview-build --> updated overview on marketer project
+       +---> Adobe I/O: validation-summary --> re-evaluated; updated on project
+       +--> content.js: new version saved on Content task document
+  -----------------------------------------------------------------------------------
+
+       |
+       v
+  S4: Email Governance Task Completed (marketer project)
+       |
+       +---> Adobe I/O: overview-summary-ops --> ops-level overview on Ops project
+       +---> Ops pre-sync pending tasks --> marked complete
+       +--> Ops Pre-Sync Summary task --> set In Progress
+
+       |
+       v
+  S6: Pre-Sync Summary task In Progress (ops project)
+       |
+       +---> Adobe I/O: sync-object-build
+       |         +--> input: content.js + tokens + program shells + SFDC IDs
+       |         +--> output: MCZ Sync Object JSON --> WF Document
+       |         |            Document ID --> Planning Request Table
+       |         +--> MCZ details text --> written to MCZ-Pre-Sync Summary task
+       |
+       +--> [REVIEW LOOP]
+       |     Operations team reviews MCZ details
+       |     +--> Changes needed? --> update fields --> re-trigger sync-object-build --> loop
+       |     +--> Approved? --> mark MCZ-Pre-Sync Summary task Complete
+       |
+       +---> Adobe I/O: overview-summary-ops --> final overview regenerated
+       +--> Ops Build task --> set In Progress
+                 |
+                 +--> Build task Complete --> Fusion sends Sync Object Document ID to SnapLogic
+
+       |
+       v
+  SnapLogic processes Sync Object --> Marketo API --> MCZ program provisioned
+
+       |
+       v
+  S7: SnapLogic Response Watch
+       |
+       +---> Sync object document version update detected
+       +---> Adobe I/O: snaplogic-response-processor
+       |         +--> input: SnapLogic response JSON (new document version)
+       |         +--> output: MCZ program URL + status + task flags + QA flag
+       |
+       +---> Workfront updates:
+       |     +--> MCZ links written to both Marketer and Ops projects
+       |     +--> Relevant tasks in both projects --> marked Complete
+       |     +--> QA task in Ops project --> set In Progress
+       +--> Planning Request Table --> updated with MCZ program details and final status
+```
+
+---
+
+## content.js Document Lifecycle
+
+```
+  [S2: Marketer Project Created]
+       |
+       v
+  Adobe I/O: overview-build creates initial content.js
+       |
+       v
+  content.js v1 --> stored as WF Document attachment on Content task
+       |               Document ID saved in Planning Request Table
+       |
+       | [Any marketer task update - S3 fires]
+       v
+  Adobe I/O: overview-build + validation-summary update content.js
+       |
+       v
+  content.js v2, v3 ... vN --> new version on same WF Document (versioned)
+
+  +-----------------------------------------------------------+
+  |               content.js JSON Structure                   |
+  +-----------------------------------------------------------+
+  |  metadata:     region, team, type, send date, request IDs |
+  |  content:      subject, preview, headline, banner, body   |
+  |                CTA text/URL, content image                |
+  |  additionalCTAs: [ CTA2{...}, CTA3{...}, CTA4{...},       |
+  |                    CTA5{...} ]                            |
+  |  targeting:    option, field values                       |
+  |  enrichment:   solution abbr, industry, POI prefix, team  |
+  |  tokens:       [ {name, value, type}, ... ]               |
+  |  validation:   { rules: [...], overallStatus, timestamp } |
+  |  overview:     { marketerSummary, opsSummary, timestamp } |
+  |  syncObject:   { documentId, status, mcz: {...} }         |
+  |  sfdc:         { required, rtid, s_iid, gated, buttonType}|
+  +-----------------------------------------------------------+
+```
+
+---
+
+## Operations Project – Task Structure and Key Milestones
+
+```
+  +------------------------------------------------------------------+
+  |              OPERATIONS PROJECT - KEY TASK FLOW                  |
+  |              (Single CTA and Multi CTA templates)                |
+  +------------------------------------------------------------------+
+  |                                                                  |
+  |  [Created by Fusion S5 after marketer project creation]          |
+  |                                                                  |
+  |  Phase 1: Overview and Setup                                     |
+  |  +--> Campaign Overview Summary task   [auto-completed by S4]    |
+  |  +--> [SFDC Tracking task]             [if SFDC flag set]        |
+  |                                                                  |
+  |  Phase 2: Pre-Sync MCZ Review                                    |
+  |  +--> Ops Email Summary task           [completion triggers S6]  |
+  |  +--> MCZ-Pre-Sync Summary task        [review / approve]        |
+  |  |     +--> MCZ details written here by Adobe I/O               |
+  |  |     +--> Ops team reviews / requests corrections             |
+  |  +--> Build task                       [set In Progress on       |
+  |                                         Pre-Sync approval]       |
+  |                                                                  |
+  |  Phase 3: Provisioning and QA                                    |
+  |  +--> SnapLogic submission             [Build task completion]   |
+  |  +--> QA Task                          [set In Progress on       |
+  |                                         MCZ success response]   |
+  +------------------------------------------------------------------+
 ```
