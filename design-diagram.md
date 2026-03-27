@@ -165,31 +165,59 @@
   CTA Type = Multi CTA Selected
        │
        ▼
-  Number of CTAs selected (e.g., 3)
+  Number of CTAs selected (2 / 3 / 4 / 5)   [default = 2]
        │
        ▼
-  ┌─────────────────────────────────────────────────────┐
-  │  CTA Section 1                                      │
-  │  ├── Headline                                       │
-  │  ├── Body Copy                                      │
-  │  ├── CTA Label                                      │
-  │  └── CTA URL                                        │
-  ├─────────────────────────────────────────────────────┤
-  │  CTA Section 2                                      │
-  │  ├── Headline                                       │
-  │  ├── Body Copy                                      │
-  │  ├── CTA Label                                      │
-  │  └── CTA URL                                        │
-  ├─────────────────────────────────────────────────────┤
-  │  CTA Section 3                                      │
-  │  ├── Headline                                       │
-  │  ├── Body Copy                                      │
-  │  ├── CTA Label                                      │
-  │  └── CTA URL                                        │
-  └─────────────────────────────────────────────────────┘
+  ┌───────────────────────────────────────────────────────────┐
+  │  BASE CONTENT (always shown when "Add content now")       │
+  │  ├── Subject Line             (open text)                 │
+  │  ├── Preview Text             (open text)                 │
+  │  ├── Email Headline           (open text)                 │
+  │  ├── Email Banner Image URL   (open text)                 │
+  │  ├── Email Body               (rich text)                 │
+  │  ├── Content Image URL        (open text)                 │
+  │  ├── CTA Text                 (open text)                 │
+  │  └── CTA URL                  (open text)                 │
+  ├───────────────────────────────────────────────────────────┤
+  │  ADDITIONAL CTA 2  (shown when CTA count >= 2)            │
+  │  ├── CTA 2 Email Headline     (open text)                 │
+  │  ├── CTA 2 Email Body         (rich text)                 │
+  │  ├── CTA 2 CTA Text           (open text)                 │
+  │  ├── CTA 2 CTA URL            (open text)                 │
+  │  └── CTA 2 Content Image URL  (open text)                 │
+  ├───────────────────────────────────────────────────────────┤
+  │  ADDITIONAL CTA 3  (shown when CTA count >= 3)            │
+  │  ├── CTA 3 Email Headline     (open text)                 │
+  │  ├── CTA 3 Email Body         (rich text)                 │
+  │  ├── CTA 3 CTA Text           (open text)                 │
+  │  ├── CTA 3 CTA URL            (open text)                 │
+  │  └── CTA 3 Content Image URL  (open text)                 │
+  ├───────────────────────────────────────────────────────────┤
+  │  ADDITIONAL CTA 4  (shown when CTA count >= 4)            │
+  │  └── [same 5 fields as CTA 2/3 pattern]                   │
+  ├───────────────────────────────────────────────────────────┤
+  │  ADDITIONAL CTA 5  (shown when CTA count = 5)             │
+  │  └── [same 5 fields as CTA 2/3 pattern]                   │
+  └───────────────────────────────────────────────────────────┘
        │
        ▼
-  Sections dynamically generated per EMEA naming conventions
+  All sections follow EMEA naming conventions and approved taxonomy
+
+  ─────────────────────────────────────────────────────────────
+  SFDC TRACKING  (conditional – shown when checkbox checked)
+  ─────────────────────────────────────────────────────────────
+  ☑ Do you require Salesforce Campaign ID Creation?
+       │
+       ▼
+  [No additional form fields shown]
+  A SFDC Campaign Tracking task is automatically added
+  to the Operations project by Fusion Scenario S5.
+  Operations team fills in:
+    ├── Salesforce Campaign ID (s_rtid)
+    ├── Internal SFDC ID (s_iid)
+    ├── Gated / Ungated
+    └── Button Type
+  These values feed into the sync object during MCZ build.
 ```
 
 ---
