@@ -222,61 +222,94 @@
 
 ---
 
-## Data Flow Diagram – Planning Tables
+## Data Flow Diagram – Planning Tables and PL Connection Enrichment
 
 ```
+  ┌─────────────────────────────────────────────────────────────────────────────────────┐
+  │                          WORKFRONT PLANNING – DATA LAYER                            │
+  │                   (PL = Planning Link Connection between tables)                    │
+  └─────────────────────────────────────────────────────────────────────────────────────┘
+
+  LOOKUP TABLES (Read-Only Reference Data – migrated from Airtable)
+  ─────────────────────────────────────────────────────────────────
+   ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+   │  Solutions      │  │  Industry       │  │  POI            │  │  Team           │
+   │  Lookup         │  │  Lookup         │  │  (Product of    │  │  Lookup         │
+   │                 │  │                 │  │  Interest)      │  │                 │
+   │ - Solution ID   │  │ - Industry ID   │  │ - POI ID        │  │ - Team ID       │
+   │ - Solution Name │  │ - Industry Name │  │ - Product Name  │  │ - Team Name     │
+   │ - Abbreviation  │  │ - Vertical Code │  │ - Token Prefix  │  │ - Routing Code  │
+   └────────┬────────┘  └────────┬────────┘  └────────┬────────┘  └────────┬────────┘
+            │ PL                  │ PL                  │ PL                  │ PL
+            └────────────┬────────┘                    └─────────┬───────────┘
+                         ▼                                        ▼
   ┌──────────────────────────────────────────────────────────────────────────────────┐
-  │                         WORKFRONT PLANNING – DATA LAYER                         │
+  │                        CAMPAIGN REQUEST DATA TABLE (Core)                        │
+  │                                                                                  │
+  │  - Request ID           - Parent Request ID     - Child Request IDs              │
+  │  - Region               - Sub-Region            - Country                        │
+  │  - Requesting Team      - Campaign Type         - CTA Count                      │
+  │  - Targeting Option     - Content Option        - Send Date                      │
+  │  - Solution ──────────► [PL: pulls Abbreviation from Solutions Lookup]           │
+  │  - Industry ──────────► [PL: pulls Vertical Code from Industry Lookup]           │
+  │  - POI ───────────────► [PL: pulls Token Prefix from POI Lookup]                 │
+  │  - Team ──────────────► [PL: pulls Routing Code from Team Lookup]                │
+  │  - Content Document ID  - Sync Object Document ID                                │
+  │  - Marketer Project ID  - Operations Project ID                                  │
+  │  - SFDC Tracking Flag   - Status                                                 │
   └──────────────────────────────────────────────────────────────────────────────────┘
+              │                                         │
+              │ enriched data flows into                │
+              ▼                                         ▼
+  ┌────────────────────────┐           ┌────────────────────────────────────────┐
+  │  Validation Rules      │           │  Interactive Message Templates          │
+  │  Lookup Table          │           │  Lookup Table                          │
+  │                        │           │                                        │
+  │  - Rule ID             │           │  - Template ID / Name                  │
+  │  - Rule Type           │           │  - Message Body                        │
+  │  - Validation Logic    │           │  - Placeholders:                       │
+  │  - Error Message       │           │    {Name}, {CampaignID}, {Region}      │
+  │  - Severity            │           │    {SendDate}, {MCZLink}               │
+  │  - Region Scope        │           │  - Usage: Issue / Project / Task       │
+  └──────────┬─────────────┘           └──────────────────┬─────────────────────┘
+             │                                             │
+             └──────────────┬──────────────────────────────┘
+                            ▼
+              [Adobe I/O: validation-summary action]
+              [Adobe I/O: overview-build action]
+                            │
+                            ▼
+              [Workfront: Marketer Project / Operations Project]
+              Validation + Overview summaries written to project
 
-   ┌─────────────────────┐    ┌─────────────────────┐    ┌──────────────────────────┐
-   │  Campaign Request   │    │  Validation Rules   │    │  Interactive Message     │
-   │  Data Table         │    │  Lookup Table        │    │  Templates Lookup Table  │
-   │                     │    │                     │    │                          │
-   │  - Request ID       │    │  - Rule ID          │    │  - Template ID           │
-   │  - Region           │    │  - Rule Name        │    │  - Template Name         │
-   │  - Sub-Region       │    │  - Rule Type        │    │  - Message Body          │
-   │  - Country          │    │  - Validation Logic │    │  - Placeholders:         │
-   │  - Requesting Team  │    │  - Error Message    │    │    {Name}                │
-   │  - Campaign Type    │    │  - Severity         │    │    {CampaignID}          │
-   │  - Content Option   │    │  - Region Scope     │    │    {Region}              │
-   │  - Targeting Option │    │  - Active Flag      │    │    {SendDate}            │
-   │  - CTA Count        │    │                     │    │  - Usage Context         │
-   │  - Send Date        │    └─────────────────────┘    │  (Issue/Project/Task)    │
-   │  - Status           │              │                └──────────────────────────┘
-   └─────────────────────┘              │                             │
-              │                         │                             │
-              └─────────────┬───────────┘                             │
-                            ▼                                         │
-                   [Adobe I/O / Fusion]                               │
-                   Validation Summary                                 │
-                   Logic Engine                                       │
-                            │                                         │
-                            └──────────────────────────────┐          │
-                                                           ▼          ▼
-                                                  [Workfront Issues / Projects / Tasks]
-                                                  Automated messages and validations
-                                                  injected using dynamic templates
-
-   ┌──────────────────────────────┐
-   │  MCZ Taxonomy Lookup Table   │
-   │                              │
-   │  - Shell ID                  │
-   │  - Shell Name                │
-   │  - Folder Path               │
-   │  - Token Name                │
-   │  - Program ID                │
-   │  - Program Name              │
-   │  - Region Mapping            │
-   │  - Campaign Type             │
-   └──────────────────────────────┘
-              │
-              ▼
-   [Adobe I/O / Fusion Function]
-   MCZ Sync Object (.JSON) Generation
-              │
-              ▼
-   SnapLogic → Marketo API
+  ─────────────────────────────────────────────────────────────────────────────────────
+  MCZ PROVISIONING LOOKUP TABLES
+  ─────────────────────────────────────────────────────────────────────────────────────
+   ┌────────────────────────────┐    ┌─────────────────────────────┐
+   │  Program Shell Table       │    │  Tokens Lookup Table         │
+   │                            │    │                             │
+   │  - Shell ID / Name         │    │  - Token Name               │
+   │  - Region                  │    │  - Token Type               │
+   │  - Campaign Type           │    │  - Default Value            │
+   │  - Solution (PL link)      │    │  - Campaign Field Mapping   │
+   │  - POI (PL link)           │    │  - Solution Applicability   │
+   │  - Folder Path             │    └──────────────┬──────────────┘
+   │  - Token Set Reference     │                   │
+   └──────────────┬─────────────┘                   │
+                  │                                  │
+                  └────────────────┬─────────────────┘
+                                   ▼
+                    [Adobe I/O: sync-object-build action]
+                    Constructs MCZ Sync Object (.JSON)
+                    Document stored as Workfront attachment
+                    Document ID ──► recorded in Request Table
+                                   │
+                                   ▼
+                    [Fusion: SnapLogic API Invocation]
+                    Document ID sent to SnapLogic
+                                   │
+                                   ▼
+                    SnapLogic processes → Marketo API → MCZ program created
 ```
 
 ---
