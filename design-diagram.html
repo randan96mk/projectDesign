@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaign Orchestration Platform — Design Diagram</title>
+<style>
+  /* ── Reset & Base ──────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --adobe-red:    #FA0F00;
+    --adobe-dark:   #2C2C2C;
+    --adobe-gray:   #4B4B4B;
+    --adobe-light:  #F5F5F5;
+    --adobe-white:  #FFFFFF;
+    --accent-blue:  #1473E6;
+    --accent-green: #12805C;
+    --accent-orange:#E68619;
+    --accent-purple:#7C3AED;
+    --accent-teal:  #0D97A5;
+    --accent-pink:  #D83790;
+    --shadow: 0 4px 24px rgba(0,0,0,.12);
+    --radius: 12px;
+    --transition: .25s ease;
+  }
+
+  body {
+    font-family: "Adobe Clean", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--adobe-light);
+    color: var(--adobe-dark);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ────────────────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, var(--adobe-dark) 0%, #1B1B1B 100%);
+    color: var(--adobe-white);
+    padding: 40px 32px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--adobe-red);
+  }
+  header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -.5px;
+    margin-bottom: 8px;
+  }
+  header h1 span { color: var(--adobe-red); }
+  header p {
+    font-size: 1.05rem;
+    opacity: .8;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* ── Legend ─────────────────────────────────────────────── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    padding: 20px 32px;
+    background: var(--adobe-white);
+    border-bottom: 1px solid #E0E0E0;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .85rem;
+    font-weight: 500;
+  }
+  .legend-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Main Container ────────────────────────────────────── */
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 40px 24px 60px;
+  }
+
+  /* ── Layer ──────────────────────────────────────────────── */
+  .layer {
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .layer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .layer-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: .9rem;
+    flex-shrink: 0;
+  }
+  .layer-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -.3px;
+  }
+  .layer-subtitle {
+    font-size: .82rem;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  /* ── Card Grid ─────────────────────────────────────────── */
+  .card-grid {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .card {
+    background: var(--adobe-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    border-left: 4px solid transparent;
+    transition: transform var(--transition), box-shadow var(--transition);
+    position: relative;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(0,0,0,.16);
+  }
+  .card-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    font-size: 1.3rem;
+  }
+  .card h3 {
+    font-size: .95rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .card p {
+    font-size: .82rem;
+    color: #666;
+    line-height: 1.55;
+  }
+  .card .tag {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: .7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #f0f0f0;
+    color: #555;
+  }
+
+  /* ── Color Themes for Layers ───────────────────────────── */
+  .layer--intake .card        { border-left-color: var(--adobe-red); }
+  .layer--intake .card-icon   { background: #FFF0EF; color: var(--adobe-red); }
+  .layer--intake .layer-badge { background: var(--adobe-red); }
+
+  .layer--orch .card        { border-left-color: var(--accent-blue); }
+  .layer--orch .card-icon   { background: #E8F1FC; color: var(--accent-blue); }
+  .layer--orch .layer-badge { background: var(--accent-blue); }
+
+  .layer--logic .card        { border-left-color: var(--accent-purple); }
+  .layer--logic .card-icon   { background: #F1ECFE; color: var(--accent-purple); }
+  .layer--logic .layer-badge { background: var(--accent-purple); }
+
+  .layer--data .card        { border-left-color: var(--accent-green); }
+  .layer--data .card-icon   { background: #E6F5F0; color: var(--accent-green); }
+  .layer--data .layer-badge { background: var(--accent-green); }
+
+  .layer--integ .card        { border-left-color: var(--accent-orange); }
+  .layer--integ .card-icon   { background: #FEF3E2; color: var(--accent-orange); }
+  .layer--integ .layer-badge { background: var(--accent-orange); }
+
+  .layer--ext .card        { border-left-color: var(--accent-teal); }
+  .layer--ext .card-icon   { background: #E2F5F7; color: var(--accent-teal); }
+  .layer--ext .layer-badge { background: var(--accent-teal); }
+
+  /* ── Flow Arrows (SVG between layers) ──────────────────── */
+  .flow-arrow {
+    display: flex;
+    justify-content: center;
+    padding: 6px 0;
+  }
+  .flow-arrow svg { display: block; }
+
+  /* ── Data-Flow Section ─────────────────────────────────── */
+  .flow-section {
+    margin-top: 52px;
+  }
+  .flow-section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 28px;
+    letter-spacing: -.3px;
+  }
+
+  .flow-pipeline {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    overflow-x: auto;
+    padding: 12px 0 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .flow-node {
+    background: var(--adobe-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 18px;
+    text-align: center;
+    min-width: 130px;
+    max-width: 160px;
+    transition: transform var(--transition);
+  }
+  .flow-node:hover { transform: scale(1.05); }
+  .flow-node .flow-icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 8px;
+    font-size: 1.1rem;
+  }
+  .flow-node h4 {
+    font-size: .8rem;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+  .flow-node p {
+    font-size: .7rem;
+    color: #888;
+  }
+  .flow-chevron {
+    color: #CCC;
+    font-size: 1.4rem;
+    padding: 0 4px;
+    flex-shrink: 0;
+    margin-top: 20px;
+  }
+
+  /* Scenario colors for flow */
+  .fi-red    .flow-icon { background: #FFF0EF; color: var(--adobe-red); }
+  .fi-blue   .flow-icon { background: #E8F1FC; color: var(--accent-blue); }
+  .fi-purple .flow-icon { background: #F1ECFE; color: var(--accent-purple); }
+  .fi-green  .flow-icon { background: #E6F5F0; color: var(--accent-green); }
+  .fi-orange .flow-icon { background: #FEF3E2; color: var(--accent-orange); }
+  .fi-teal   .flow-icon { background: #E2F5F7; color: var(--accent-teal); }
+
+  /* ── Scenario Table ────────────────────────────────────── */
+  .scenario-section {
+    margin-top: 52px;
+  }
+  .scenario-section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .scenario-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--adobe-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .scenario-table th {
+    background: var(--adobe-dark);
+    color: var(--adobe-white);
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 14px 16px;
+    text-align: left;
+  }
+  .scenario-table td {
+    padding: 12px 16px;
+    font-size: .85rem;
+    border-bottom: 1px solid #ECECEC;
+    vertical-align: top;
+  }
+  .scenario-table tr:last-child td { border-bottom: none; }
+  .scenario-table tr:hover td { background: #FAFAFA; }
+  .scenario-id {
+    font-weight: 700;
+    color: var(--accent-blue);
+    white-space: nowrap;
+  }
+
+  /* ── PL Connection Diagram ─────────────────────────────── */
+  .pl-section {
+    margin-top: 52px;
+  }
+  .pl-section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .pl-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 12px;
+    align-items: center;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .pl-card {
+    background: var(--adobe-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 14px 18px;
+    text-align: center;
+  }
+  .pl-card h4 { font-size: .85rem; font-weight: 700; margin-bottom: 2px; }
+  .pl-card p { font-size: .72rem; color: #888; }
+  .pl-connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--accent-green);
+    gap: 4px;
+  }
+  .pl-connector svg { flex-shrink: 0; }
+
+  /* ── Footer ────────────────────────────────────────────── */
+  footer {
+    text-align: center;
+    padding: 32px 24px;
+    font-size: .78rem;
+    color: #999;
+    border-top: 1px solid #E0E0E0;
+    margin-top: 40px;
+  }
+  footer strong { color: var(--adobe-red); }
+
+  /* ── Responsive ────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    header h1 { font-size: 1.4rem; }
+    .card-grid { grid-template-columns: 1fr; }
+    .flow-pipeline { justify-content: flex-start; }
+    .pl-grid { grid-template-columns: 1fr; }
+    .pl-connector { transform: rotate(90deg); }
+    .scenario-table { font-size: .78rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header>
+  <h1><span>Adobe</span> Campaign Orchestration Platform</h1>
+  <p>End-to-end marketing automation — from intake request to Marketo provisioning across APAC, AMER &amp; EMEA regions</p>
+</header>
+
+<!-- ═══════════ LEGEND ═══════════ -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--adobe-red)"></div> Intake &amp; UI</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-blue)"></div> Orchestration</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-purple)"></div> Business Logic</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-green)"></div> Data &amp; Enrichment</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-orange)"></div> Integration</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--accent-teal)"></div> External Systems</div>
+</div>
+
+<main>
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  LAYER 1 — INTAKE                                   ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<section class="layer layer--intake">
+  <div class="layer-header">
+    <div class="layer-badge">1</div>
+    <div>
+      <div class="layer-title">Intake &amp; Request Layer</div>
+      <div class="layer-subtitle">Standardised campaign request submission</div>
+    </div>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">&#128221;</div>
+      <h3>Adobe Workfront</h3>
+      <p>Standardised intake request forms with dynamic fields for APAC &amp; AMER regions. Supports single &amp; multi-CTA campaigns (up to 5 CTAs).</p>
+      <span class="tag">Forms &amp; Projects</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#127912;</div>
+      <h3>Miro</h3>
+      <p>Visual UI design reference boards for intake form layouts and user-flow wireframes.</p>
+      <span class="tag">UI Design</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128203;</div>
+      <h3>SharePoint Excel</h3>
+      <p>Taxonomy reference sheets defining naming conventions, abbreviations, and governance standards.</p>
+      <span class="tag">Taxonomy</span>
+    </div>
+  </div>
+</section>
+
+<!-- Arrow -->
+<div class="flow-arrow">
+  <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0v24m0 0l-7-7m7 7l7-7" stroke="#CCC" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  LAYER 2 — ORCHESTRATION                             ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<section class="layer layer--orch">
+  <div class="layer-header">
+    <div class="layer-badge">2</div>
+    <div>
+      <div class="layer-title">Orchestration Layer</div>
+      <div class="layer-subtitle">Event-driven automation via 7 Fusion scenarios</div>
+    </div>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">&#9889;</div>
+      <h3>Workfront Fusion</h3>
+      <p>Seven scenarios (S1–S7) watch for events, trigger project creation, monitor tasks, build sync objects, and process responses.</p>
+      <span class="tag">7 Scenarios</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128196;</div>
+      <h3>content.js Document</h3>
+      <p>Central versioned JSON document attached to Content tasks. Updated on every marketer task change (via S3). Consolidates all campaign data.</p>
+      <span class="tag">Versioned JSON</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128736;</div>
+      <h3>Project Templates</h3>
+      <p>Marketer &amp; Operations project templates with phased tasks, region-specific routing, and CTA-type-based scaffolding.</p>
+      <span class="tag">Templating</span>
+    </div>
+  </div>
+</section>
+
+<!-- Arrow -->
+<div class="flow-arrow">
+  <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0v24m0 0l-7-7m7 7l7-7" stroke="#CCC" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  LAYER 3 — BUSINESS LOGIC                            ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<section class="layer layer--logic">
+  <div class="layer-header">
+    <div class="layer-badge">3</div>
+    <div>
+      <div class="layer-title">Business Logic Layer</div>
+      <div class="layer-subtitle">Stateless JavaScript actions on Adobe I/O Runtime</div>
+    </div>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">&#128270;</div>
+      <h3>overview-build</h3>
+      <p>Generates human-readable request overviews from intake data for marketer review.</p>
+      <span class="tag">Adobe I/O Action</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#9989;</div>
+      <h3>validation-summary</h3>
+      <p>Evaluates requests against region-specific validation rules and severity levels.</p>
+      <span class="tag">Adobe I/O Action</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128200;</div>
+      <h3>overview-summary-ops</h3>
+      <p>Generates operations-level overviews with enriched data for ops team consumption.</p>
+      <span class="tag">Adobe I/O Action</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128295;</div>
+      <h3>sync-object-build</h3>
+      <p>Constructs MCZ sync object payloads with enriched data, resolved tokens, and program shells.</p>
+      <span class="tag">Adobe I/O Action</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128228;</div>
+      <h3>snaplogic-response-processor</h3>
+      <p>Decodes and processes SnapLogic provisioning responses, updates project status.</p>
+      <span class="tag">Adobe I/O Action</span>
+    </div>
+  </div>
+</section>
+
+<!-- Arrow -->
+<div class="flow-arrow">
+  <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0v24m0 0l-7-7m7 7l7-7" stroke="#CCC" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  LAYER 4 — DATA & ENRICHMENT                         ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<section class="layer layer--data">
+  <div class="layer-header">
+    <div class="layer-badge">4</div>
+    <div>
+      <div class="layer-title">Data &amp; Enrichment Layer</div>
+      <div class="layer-subtitle">Workfront Planning lookup tables with PL connections</div>
+    </div>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">&#128451;</div>
+      <h3>Campaign Request Table</h3>
+      <p>Core request storage with PL links to Solutions, Industry, POI, and Team lookups.</p>
+      <span class="tag">Primary Table</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128218;</div>
+      <h3>Lookup Tables</h3>
+      <p>Solutions, Industry, POI (Product of Interest), and Team lookup tables with abbreviations and routing codes.</p>
+      <span class="tag">4 Lookups</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128220;</div>
+      <h3>Validation Rules</h3>
+      <p>Region-specific compliance rules with severity levels and interactive message templates.</p>
+      <span class="tag">Rules Engine</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#129521;</div>
+      <h3>MCZ Taxonomy &amp; Shells</h3>
+      <p>Marketo program shell templates and token definitions with field mappings for provisioning.</p>
+      <span class="tag">MCZ Config</span>
+    </div>
+  </div>
+</section>
+
+<!-- Arrow -->
+<div class="flow-arrow">
+  <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0v24m0 0l-7-7m7 7l7-7" stroke="#CCC" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  LAYER 5 — INTEGRATION                               ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<section class="layer layer--integ">
+  <div class="layer-header">
+    <div class="layer-badge">5</div>
+    <div>
+      <div class="layer-title">Integration Layer</div>
+      <div class="layer-subtitle">API gateway and campaign provisioning</div>
+    </div>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">&#128256;</div>
+      <h3>SnapLogic</h3>
+      <p>API gateway / middleware that receives MCZ sync object payloads, transforms data, and forwards to Marketo API.</p>
+      <span class="tag">API Gateway</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#127919;</div>
+      <h3>Adobe Marketo (MCZ)</h3>
+      <p>Marketing automation platform. Receives provisioned campaign programs, tokens, and smart-campaign configurations.</p>
+      <span class="tag">Target Platform</span>
+    </div>
+  </div>
+</section>
+
+<!-- Arrow -->
+<div class="flow-arrow">
+  <svg width="24" height="32" viewBox="0 0 24 32"><path d="M12 0v24m0 0l-7-7m7 7l7-7" stroke="#CCC" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════════╗
+     ║  LAYER 6 — EXTERNAL                                  ║
+     ╚══════════════════════════════════════════════════════╝ -->
+<section class="layer layer--ext">
+  <div class="layer-header">
+    <div class="layer-badge">6</div>
+    <div>
+      <div class="layer-title">External Systems</div>
+      <div class="layer-subtitle">Connected third-party platforms</div>
+    </div>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">&#9729;&#65039;</div>
+      <h3>Salesforce</h3>
+      <p>CRM integration for optional SFDC Campaign ID tracking. IDs embedded in sync objects for cross-platform attribution.</p>
+      <span class="tag">CRM</span>
+    </div>
+    <div class="card">
+      <div class="card-icon">&#128202;</div>
+      <h3>Airtable (Legacy)</h3>
+      <p>Legacy data source being migrated to Workfront Planning. Previously held lookup and taxonomy data.</p>
+      <span class="tag">Deprecating</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     END-TO-END DATA FLOW
+     ═══════════════════════════════════════════════════════ -->
+<section class="flow-section">
+  <h2>End-to-End Data Flow</h2>
+  <div class="flow-pipeline">
+
+    <div class="flow-step">
+      <div class="flow-node fi-red">
+        <div class="flow-icon">&#128221;</div>
+        <h4>Intake Form</h4>
+        <p>Workfront</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-blue">
+        <div class="flow-icon">&#9889;</div>
+        <h4>S1 — Validate</h4>
+        <p>Fusion</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-blue">
+        <div class="flow-icon">&#128194;</div>
+        <h4>S2 — Project</h4>
+        <p>Marketer</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-purple">
+        <div class="flow-icon">&#128196;</div>
+        <h4>content.js</h4>
+        <p>Build &amp; Version</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-blue">
+        <div class="flow-icon">&#128065;</div>
+        <h4>S3 — Watch</h4>
+        <p>Task Changes</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-green">
+        <div class="flow-icon">&#9989;</div>
+        <h4>S4 — Govern</h4>
+        <p>Email Approval</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-blue">
+        <div class="flow-icon">&#128736;</div>
+        <h4>S5 — Ops</h4>
+        <p>Project Create</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-purple">
+        <div class="flow-icon">&#128295;</div>
+        <h4>S6 — Sync</h4>
+        <p>Object Build</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-orange">
+        <div class="flow-icon">&#128256;</div>
+        <h4>SnapLogic</h4>
+        <p>API Gateway</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-orange">
+        <div class="flow-icon">&#127919;</div>
+        <h4>Marketo</h4>
+        <p>MCZ Provision</p>
+      </div>
+    </div>
+    <div class="flow-chevron">&#10132;</div>
+
+    <div class="flow-step">
+      <div class="flow-node fi-blue">
+        <div class="flow-icon">&#128228;</div>
+        <h4>S7 — Response</h4>
+        <p>Update Projects</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     FUSION SCENARIO REFERENCE
+     ═══════════════════════════════════════════════════════ -->
+<section class="scenario-section">
+  <h2>Workfront Fusion Scenarios</h2>
+  <div style="overflow-x:auto;">
+  <table class="scenario-table">
+    <thead>
+      <tr>
+        <th>Scenario</th>
+        <th>Name</th>
+        <th>Trigger</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="scenario-id">S1</td>
+        <td>Intake Request Processing</td>
+        <td>New request submitted</td>
+        <td>Validates request, triggers downstream creation</td>
+      </tr>
+      <tr>
+        <td class="scenario-id">S2</td>
+        <td>Marketer Project Creation</td>
+        <td>Request validated</td>
+        <td>Creates marketer project from template</td>
+      </tr>
+      <tr>
+        <td class="scenario-id">S3</td>
+        <td>Task Change Watcher</td>
+        <td>Marketer task updated</td>
+        <td>Updates content.js with latest data</td>
+      </tr>
+      <tr>
+        <td class="scenario-id">S4</td>
+        <td>Email Governance Watch</td>
+        <td>Governance task complete</td>
+        <td>Triggers sync object generation</td>
+      </tr>
+      <tr>
+        <td class="scenario-id">S5</td>
+        <td>Ops Project Creation</td>
+        <td>Governance approved</td>
+        <td>Creates ops project with region/CTA routing</td>
+      </tr>
+      <tr>
+        <td class="scenario-id">S6</td>
+        <td>Sync Object &amp; SnapLogic</td>
+        <td>Build task complete</td>
+        <td>Builds MCZ payload, invokes SnapLogic API</td>
+      </tr>
+      <tr>
+        <td class="scenario-id">S7</td>
+        <td>Response Processing</td>
+        <td>SnapLogic response received</td>
+        <td>Updates projects with MCZ links, activates QA</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
+     PL CONNECTION MAP
+     ═══════════════════════════════════════════════════════ -->
+<section class="pl-section">
+  <h2>Planning Link (PL) Connections</h2>
+
+  <div class="pl-grid">
+    <div class="pl-card" style="border-left:4px solid var(--accent-green)">
+      <h4>Campaign Request Table</h4>
+      <p>Core campaign data</p>
+    </div>
+    <div class="pl-connector">
+      <svg width="48" height="16" viewBox="0 0 48 16"><path d="M0 8h40m0 0l-6-6m6 6l-6 6" stroke="#12805C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      PL
+    </div>
+    <div class="pl-card">
+      <h4>Solutions Lookup</h4>
+      <p>Abbreviations &amp; codes</p>
+    </div>
+  </div>
+
+  <div class="pl-grid" style="margin-top:10px">
+    <div class="pl-card" style="border-left:4px solid var(--accent-green)">
+      <h4>Campaign Request Table</h4>
+      <p>Core campaign data</p>
+    </div>
+    <div class="pl-connector">
+      <svg width="48" height="16" viewBox="0 0 48 16"><path d="M0 8h40m0 0l-6-6m6 6l-6 6" stroke="#12805C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      PL
+    </div>
+    <div class="pl-card">
+      <h4>Industry Lookup</h4>
+      <p>Vertical categories</p>
+    </div>
+  </div>
+
+  <div class="pl-grid" style="margin-top:10px">
+    <div class="pl-card" style="border-left:4px solid var(--accent-green)">
+      <h4>Campaign Request Table</h4>
+      <p>Core campaign data</p>
+    </div>
+    <div class="pl-connector">
+      <svg width="48" height="16" viewBox="0 0 48 16"><path d="M0 8h40m0 0l-6-6m6 6l-6 6" stroke="#12805C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      PL
+    </div>
+    <div class="pl-card">
+      <h4>POI Lookup</h4>
+      <p>Product of Interest</p>
+    </div>
+  </div>
+
+  <div class="pl-grid" style="margin-top:10px">
+    <div class="pl-card" style="border-left:4px solid var(--accent-green)">
+      <h4>Campaign Request Table</h4>
+      <p>Core campaign data</p>
+    </div>
+    <div class="pl-connector">
+      <svg width="48" height="16" viewBox="0 0 48 16"><path d="M0 8h40m0 0l-6-6m6 6l-6 6" stroke="#12805C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      PL
+    </div>
+    <div class="pl-card">
+      <h4>Team Lookup</h4>
+      <p>Routing codes</p>
+    </div>
+  </div>
+
+  <div class="pl-grid" style="margin-top:10px">
+    <div class="pl-card" style="border-left:4px solid var(--accent-green)">
+      <h4>Program Shell Table</h4>
+      <p>MCZ infrastructure</p>
+    </div>
+    <div class="pl-connector">
+      <svg width="48" height="16" viewBox="0 0 48 16"><path d="M0 8h40m0 0l-6-6m6 6l-6 6" stroke="#12805C" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      PL
+    </div>
+    <div class="pl-card">
+      <h4>Solutions &amp; POI</h4>
+      <p>Maps shell to product</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer>
+  <strong>Adobe</strong> Campaign Orchestration Platform &mdash; Design Diagram &mdash; APAC &bull; AMER &bull; EMEA
+</footer>
+
+</body>
+</html>
