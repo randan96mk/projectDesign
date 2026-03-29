@@ -2,384 +2,239 @@
  * ============================================================
  *  Campaign Orchestration Platform — Data Flow Diagram (DFD)
  *  Miro Board Script  ·  Paste into Chrome DevTools Console
- *  while on your Miro board tab.
+ *  while on your Miro board tab  (app.miro.com)
  * ============================================================
  *
  *  USAGE:
  *    1. Open your Miro board in Chrome
  *    2. Press F12 → Console tab
  *    3. Paste this entire script and press Enter
- *    4. Wait ~15–20 seconds for all shapes to appear
- *
- *  WHAT IT CREATES:
- *    - Title + Legend
- *    - 3 External Entities  (Marketer, Ops Team, Adobe Marketo)
- *    - 1 SFDC Values note   (dashed amber box — no API call)
- *    - 7 Processes          (P1–P7 mapping to Fusion S1–S7)
- *    - 5 Data Stores        (D1–D5)
- *    - 20 labeled connectors with direction arrows
+ *    4. Watch progress logs — shapes appear in sequence (~20 s)
+ *    5. Press Ctrl+Shift+H to fit the full diagram on screen
  * ============================================================
  */
 
 (async () => {
 
-  // ── GUARD ──────────────────────────────────────────────────
   if (typeof miro === 'undefined' || !miro.board) {
-    console.error('❌  Miro SDK not found. Make sure you are on a Miro board page (app.miro.com).');
+    console.error('❌ Not on a Miro board. Open app.miro.com first.');
     return;
   }
 
-  console.log('🚀  Building DFD on Miro board — please wait...');
+  console.log('🚀 Building DFD — please wait...');
+  const b = miro.board;
+  const n = {}; // id registry
+
+  // ── SAFE SHAPE STYLE (only fields Miro SDK v2 accepts) ────
+  // borderOpacity / fillOpacity omitted — default = 100 (fully opaque)
+  // All numeric fields are strict integers.
+
+  const shapeStyle = (fill, border, bw, textColor, fs, align) => ({
+    fillColor         : fill,
+    borderColor       : border,
+    borderWidth       : Math.round(bw),   // guarantee integer
+    borderStyle       : 'normal',
+    textAlign         : align || 'center',
+    textAlignVertical : 'middle',
+    fontFamily        : 'open_sans',
+    fontSize          : Math.round(fs),   // guarantee integer
+    color             : textColor,
+  });
+
+  const dashedStyle = (fill, border, textColor, fs) => ({
+    fillColor         : fill,
+    borderColor       : border,
+    borderWidth       : 1,
+    borderStyle       : 'dashed',
+    textAlign         : 'center',
+    textAlignVertical : 'middle',
+    fontFamily        : 'open_sans',
+    fontSize          : Math.round(fs),
+    color             : textColor,
+  });
+
+  // ── SHAPE HELPER ──────────────────────────────────────────
+  const S = async (key, opts) => {
+    console.log(`  Creating: ${key}`);
+    const s = await b.createShape(opts);
+    n[key] = s.id;
+    return s;
+  };
+
+  // ── CONNECTOR HELPER ──────────────────────────────────────
+  const C = async (from, to, label, opts = {}) => {
+    await b.createConnector({
+      shape : 'elbowed',
+      style : {
+        startStrokeCap : 'none',
+        endStrokeCap   : 'arrow',
+        strokeColor    : opts.color  || '#666666',
+        strokeWidth    : opts.thick  ? 3 : 2,
+        strokeStyle    : opts.dashed ? 'dashed' : 'normal',
+        fontSize       : 10,
+        color          : opts.color  || '#555555',
+        fontFamily     : 'open_sans',
+      },
+      start    : { item: n[from], position: opts.sp || { x: 0.5, y: 1   } },
+      end      : { item: n[to],   position: opts.ep || { x: 0.5, y: 0   } },
+      captions : label ? [{ content: label, position: 0.5 }] : [],
+    });
+  };
+
+  // ── COLOURS ───────────────────────────────────────────────
+  const RED    = '#FA0F00';
+  const BLUE   = '#1473E6';
+  const GREEN  = '#12805C';
+  const PURPLE = '#7C3AED';
+  const ORANGE = '#E68619';
+  const DARK   = '#2C2C2C';
+
+  // ── LAYOUT ────────────────────────────────────────────────
+  const L = {
+    marketer : { x: -650, y: -380 },
+    opsTeam  : { x: -650, y:  340 },
+    marketo  : { x:  860, y:  340 },
+    sfdc     : { x:  680, y: -540 },
+    p1: { x:   0, y: -380 },
+    p2: { x:   0, y: -200 },
+    p3: { x:   0, y:  -20 },
+    p4: { x:   0, y:  160 },
+    p5: { x:   0, y:  340 },
+    p6: { x:  380, y:  340 },
+    p7: { x:  380, y:  520 },
+    d1: { x:  680, y: -330 },
+    d2: { x:  680, y: -250 },
+    d3: { x:  680, y: -170 },
+    d4: { x:  680, y:  -90 },
+    d5: { x:  680, y:   -5 },
+  };
 
   try {
-    const b = miro.board;
-    const n = {}; // shape id registry: key → id
 
-    // ── HELPERS ────────────────────────────────────────────────
-
-    /** Create a shape, register its id under `key`. */
-    const mkShape = async (key, opts) => {
-      const s = await b.createShape(opts);
-      if (key) n[key] = s.id;
-      return s;
-    };
-
-    /** Create a labeled, directed connector between two registered shapes. */
-    const mkConn = async (fromKey, toKey, label = '', opts = {}) => {
-      await b.createConnector({
-        shape: 'elbowed',
-        style: {
-          startStrokeCap : 'none',
-          endStrokeCap   : 'arrow',
-          strokeColor    : opts.color  || '#666666',
-          strokeWidth    : opts.thick  ? 3 : 2,
-          strokeStyle    : opts.dashed ? 'dashed' : 'normal',
-          fontSize       : 10,
-          color          : opts.color  || '#555555',
-          fontFamily     : 'open_sans',
-        },
-        start: { item: n[fromKey], position: opts.sp || { x: 0.5, y: 1 } },
-        end  : { item: n[toKey],   position: opts.ep || { x: 0.5, y: 0 } },
-        captions: label ? [{ content: label, position: 0.5 }] : [],
-      });
-    };
-
-    // ── COLOR PALETTE ──────────────────────────────────────────
-    const RED    = '#FA0F00';
-    const BLUE   = '#1473E6';
-    const GREEN  = '#12805C';
-    const PURPLE = '#7C3AED';
-    const ORANGE = '#E68619';
-
-    // ── LAYOUT (x, y = centre of each element) ─────────────────
-    //  Processes form a vertical spine at x=0.
-    //  Data stores stack on the right at x=680.
-    //  Entities sit on the far left / right.
-    //  SFDC note sits top-right.
-
-    const L = {
-      // External entities
-      marketer : { x: -650, y: -400 },
-      opsTeam  : { x: -650, y:  320 },
-      marketo  : { x:  860, y:  320 },
-      // SFDC note
-      sfdc     : { x:  680, y: -560 },
-      // Processes
-      p1: { x:  0, y: -400 },
-      p2: { x:  0, y: -220 },
-      p3: { x:  0, y:  -40 },
-      p4: { x:  0, y:  140 },
-      p5: { x:  0, y:  320 },
-      p6: { x: 380, y:  320 },
-      p7: { x: 380, y:  500 },
-      // Data stores
-      d1: { x: 680, y: -340 },
-      d2: { x: 680, y: -255 },
-      d3: { x: 680, y: -170 },
-      d4: { x: 680, y:  -85 },
-      d5: { x: 680, y:    0 },
-    };
-
-    // ── TITLE ─────────────────────────────────────────────────
+    // ── TITLE ───────────────────────────────────────────────
+    console.log('  Creating: title');
     await b.createText({
-      content : '<strong>Campaign Orchestration Platform — Data Flow Diagram (DFD)</strong>',
-      x: 50, y: -680,
-      width: 900,
-      style: {
-        textAlign  : 'center',
-        fontSize   : 22,
-        color      : '#2C2C2C',
-        fontFamily : 'open_sans',
-      },
-    });
-    await b.createText({
-      content : 'Level-1 DFD  ·  APAC / AMER scope  ·  Adobe Campaign Orchestration',
-      x: 50, y: -645,
-      width: 900,
-      style: {
-        textAlign  : 'center',
-        fontSize   : 13,
-        color      : '#888888',
-        fontFamily : 'open_sans',
-      },
+      content : 'Campaign Orchestration Platform — Data Flow Diagram (DFD)\nLevel-1 DFD  ·  APAC / AMER scope  ·  Adobe Campaign Orchestration',
+      x: 50, y: -680, width: 900,
+      style: { textAlign: 'center', fontSize: 18, color: DARK, fontFamily: 'open_sans' },
     });
 
-    // ── LEGEND ─────────────────────────────────────────────────
-    const legendDefs = [
-      { label: 'External Entity',  fill: '#FFF0EF', border: RED    },
-      { label: 'Process  (Pn)',    fill: '#EAF2FF', border: BLUE   },
-      { label: 'Data Store  (Dn)', fill: '#E6F5F0', border: GREEN  },
-      { label: 'SFDC Note',        fill: '#FFFDE7', border: ORANGE },
+    // ── LEGEND ──────────────────────────────────────────────
+    const legs = [
+      { lbl: 'External Entity',  fill: '#FFF0EF', border: RED    },
+      { lbl: 'Process (Pn)',     fill: '#EAF2FF', border: BLUE   },
+      { lbl: 'Data Store (Dn)', fill: '#E6F5F0', border: GREEN  },
+      { lbl: 'SFDC Note',       fill: '#FFFDE7', border: ORANGE },
     ];
     let lx = -680;
-    for (const leg of legendDefs) {
+    for (const leg of legs) {
+      console.log(`  Creating legend: ${leg.lbl}`);
       await b.createShape({
         type: 'shape', shape: 'rectangle',
-        content: leg.label,
-        x: lx, y: -610,
-        width: 155, height: 38,
-        style: {
-          fillColor           : leg.fill,
-          borderColor         : leg.border,
-          borderWidth         : 2,
-          borderStyle         : 'normal',
-          borderOpacity       : 1,
-          fillOpacity         : 1,
-          textAlign           : 'center',
-          textAlignVertical   : 'middle',
-          fontFamily          : 'open_sans',
-          fontSize            : 11,
-          color               : '#1A1A1A',
-        },
+        content: leg.lbl,
+        x: lx, y: -610, width: 158, height: 36,
+        style: shapeStyle(leg.fill, leg.border, 2, DARK, 11),
       });
-      lx += 170;
+      lx += 172;
     }
 
-    // ── EXTERNAL ENTITIES ──────────────────────────────────────
-    const entityBase = {
-      type  : 'shape',
-      shape : 'rectangle',
-      width : 185,
-      height: 72,
-    };
-
-    await mkShape('marketer', {
-      ...entityBase,
-      content: 'Marketer\nAPAC / AMER / EMEA',
-      x: L.marketer.x, y: L.marketer.y,
-      style: {
-        fillColor: '#FFF0EF', borderColor: RED, borderWidth: 3,
-        borderStyle: 'normal', borderOpacity: 1, fillOpacity: 1,
-        textAlign: 'center', textAlignVertical: 'middle',
-        fontFamily: 'open_sans', fontSize: 13, color: RED,
-      },
-    });
-
-    await mkShape('opsTeam', {
-      ...entityBase,
-      content: 'Operations Team\nMCZ Review & QA',
-      x: L.opsTeam.x, y: L.opsTeam.y,
-      style: {
-        fillColor: '#E8F1FC', borderColor: BLUE, borderWidth: 3,
-        borderStyle: 'normal', borderOpacity: 1, fillOpacity: 1,
-        textAlign: 'center', textAlignVertical: 'middle',
-        fontFamily: 'open_sans', fontSize: 13, color: BLUE,
-      },
-    });
-
-    await mkShape('marketo', {
-      ...entityBase,
-      content: 'Adobe Marketo\nMCZ Programs',
-      x: L.marketo.x, y: L.marketo.y,
-      style: {
-        fillColor: '#FEF3E2', borderColor: ORANGE, borderWidth: 3,
-        borderStyle: 'normal', borderOpacity: 1, fillOpacity: 1,
-        textAlign: 'center', textAlignVertical: 'middle',
-        fontFamily: 'open_sans', fontSize: 13, color: ORANGE,
-      },
-    });
-
-    // ── SFDC NOTE (dashed amber box) ───────────────────────────
-    await mkShape('sfdc', {
+    // ── EXTERNAL ENTITIES ────────────────────────────────────
+    await S('marketer', {
       type: 'shape', shape: 'rectangle',
-      content: 'SFDC Values\nMarketer enters s_rtid / s_iid\nin CTA URL fields — no API call',
-      x: L.sfdc.x, y: L.sfdc.y,
-      width: 215, height: 82,
-      style: {
-        fillColor: '#FFFDE7', borderColor: ORANGE, borderWidth: 1,
-        borderStyle: 'dashed', borderOpacity: 1, fillOpacity: 1,
-        textAlign: 'center', textAlignVertical: 'middle',
-        fontFamily: 'open_sans', fontSize: 10, color: '#5C4B00',
-      },
+      content: 'Marketer\nAPAC / AMER / EMEA',
+      x: L.marketer.x, y: L.marketer.y, width: 185, height: 72,
+      style: shapeStyle('#FFF0EF', RED, 3, RED, 13),
     });
 
-    // ── PROCESSES ─────────────────────────────────────────────
-    // Each process uses round_rectangle with a coloured left band
-    // simulated by the border colour.  Number badge via text label.
-    const processDefs = [
-      { key: 'p1', color: RED,    label: 'P1  Intake Processing',    sub: 'S1 · Validate & Route' },
-      { key: 'p2', color: BLUE,   label: 'P2  Project Scaffolding',  sub: 'S2 · Marketer Project Create' },
-      { key: 'p3', color: PURPLE, label: 'P3  Content Management',   sub: 'S3 · Watch & Update content.js' },
-      { key: 'p4', color: GREEN,  label: 'P4  Governance Check',     sub: 'S4 · Email Approval Gate' },
-      { key: 'p5', color: BLUE,   label: 'P5  Ops & Sync Build',     sub: 'S5+S6 · Build MCZ Payload' },
-      { key: 'p6', color: ORANGE, label: 'P6  API Dispatch',         sub: 'SnapLogic Gateway' },
-      { key: 'p7', color: PURPLE, label: 'P7  Response Processing',  sub: 'S7 · Update & Activate QA' },
+    await S('opsTeam', {
+      type: 'shape', shape: 'rectangle',
+      content: 'Operations Team\nMCZ Review & QA',
+      x: L.opsTeam.x, y: L.opsTeam.y, width: 185, height: 72,
+      style: shapeStyle('#E8F1FC', BLUE, 3, BLUE, 13),
+    });
+
+    await S('marketo', {
+      type: 'shape', shape: 'rectangle',
+      content: 'Adobe Marketo\nMCZ Programs',
+      x: L.marketo.x, y: L.marketo.y, width: 185, height: 72,
+      style: shapeStyle('#FEF3E2', ORANGE, 3, ORANGE, 13),
+    });
+
+    // ── SFDC NOTE ────────────────────────────────────────────
+    await S('sfdc', {
+      type: 'shape', shape: 'rectangle',
+      content: 'SFDC Values\nMarketer enters s_rtid / s_iid in CTA URL fields\nNo Salesforce API call',
+      x: L.sfdc.x, y: L.sfdc.y, width: 218, height: 80,
+      style: dashedStyle('#FFFDE7', ORANGE, '#5C4B00', 10),
+    });
+
+    // ── PROCESSES ────────────────────────────────────────────
+    const procs = [
+      { key: 'p1', c: RED,    txt: 'P1  Intake Processing\nS1 · Validate & Route'         },
+      { key: 'p2', c: BLUE,   txt: 'P2  Project Scaffolding\nS2 · Marketer Project Create' },
+      { key: 'p3', c: PURPLE, txt: 'P3  Content Management\nS3 · Watch & Update content.js'},
+      { key: 'p4', c: GREEN,  txt: 'P4  Governance Check\nS4 · Email Approval Gate'        },
+      { key: 'p5', c: BLUE,   txt: 'P5  Ops & Sync Build\nS5+S6 · Build MCZ Payload'       },
+      { key: 'p6', c: ORANGE, txt: 'P6  API Dispatch\nSnapLogic Gateway'                  },
+      { key: 'p7', c: PURPLE, txt: 'P7  Response Processing\nS7 · Update & Activate QA'   },
     ];
-
-    for (const p of processDefs) {
-      await mkShape(p.key, {
-        type: 'shape', shape: 'round_rectangle',
-        content: `${p.label}\n${p.sub}`,
-        x: L[p.key].x, y: L[p.key].y,
-        width: 248, height: 72,
-        style: {
-          fillColor: '#FFFFFF', borderColor: p.color, borderWidth: 3,
-          borderStyle: 'normal', borderOpacity: 1, fillOpacity: 1,
-          textAlign: 'center', textAlignVertical: 'middle',
-          fontFamily: 'open_sans', fontSize: 12, color: '#1A1A1A',
-        },
-      });
-    }
-
-    // ── DATA STORES ────────────────────────────────────────────
-    // Standard DFD open-rectangle notation approximated with
-    // a flat rectangle in #E6F5F0 (green tint) + green border.
-    const storeDefs = [
-      { key: 'd1', label: 'D1  Campaign Request Table',  sub: 'Core request storage' },
-      { key: 'd2', label: 'D2  Lookup Tables (4)',       sub: 'Solutions · Industry · POI · Team' },
-      { key: 'd3', label: 'D3  Validation Rules',        sub: 'Region-specific compliance' },
-      { key: 'd4', label: 'D4  MCZ Taxonomy & Shells',   sub: 'Tokens & program templates' },
-      { key: 'd5', label: 'D5  content.js',              sub: 'Versioned campaign JSON' },
-    ];
-
-    for (const s of storeDefs) {
-      await mkShape(s.key, {
+    for (const p of procs) {
+      await S(p.key, {
         type: 'shape', shape: 'rectangle',
-        content: `${s.label}\n${s.sub}`,
-        x: L[s.key].x, y: L[s.key].y,
-        width: 238, height: 62,
-        style: {
-          fillColor: '#E6F5F0', borderColor: GREEN, borderWidth: 2,
-          borderStyle: 'normal', borderOpacity: 1, fillOpacity: 1,
-          textAlign: 'left', textAlignVertical: 'middle',
-          fontFamily: 'open_sans', fontSize: 11, color: '#1A1A1A',
-        },
+        content: p.txt,
+        x: L[p.key].x, y: L[p.key].y, width: 248, height: 72,
+        style: shapeStyle('#FFFFFF', p.c, 3, DARK, 12),
       });
     }
 
-    // ── CONNECTORS ─────────────────────────────────────────────
-    // sp = start position on source shape (x,y in 0–1 relative coords)
-    // ep = end position on target shape
-    // Sides: top={x:0.5,y:0}  bottom={x:0.5,y:1}
-    //        left={x:0,y:0.5} right={x:1,y:0.5}
+    // ── DATA STORES ──────────────────────────────────────────
+    const stores = [
+      { key: 'd1', txt: 'D1  Campaign Request Table\nCore request storage'          },
+      { key: 'd2', txt: 'D2  Lookup Tables (4)\nSolutions · Industry · POI · Team'  },
+      { key: 'd3', txt: 'D3  Validation Rules\nRegion-specific compliance'           },
+      { key: 'd4', txt: 'D4  MCZ Taxonomy & Shells\nTokens & program templates'      },
+      { key: 'd5', txt: 'D5  content.js\nVersioned campaign JSON'                   },
+    ];
+    for (const s of stores) {
+      await S(s.key, {
+        type: 'shape', shape: 'rectangle',
+        content: s.txt,
+        x: L[s.key].x, y: L[s.key].y, width: 238, height: 60,
+        style: shapeStyle('#E6F5F0', GREEN, 2, DARK, 11, 'left'),
+      });
+    }
 
-    const R = { x: 1, y: 0.5 };  // right centre
-    const LL = { x: 0, y: 0.5 }; // left  centre
-    const T  = { x: 0.5, y: 0 }; // top   centre
-    const B  = { x: 0.5, y: 1 }; // bottom centre
+    // ── CONNECTORS ───────────────────────────────────────────
+    console.log('  Creating connectors...');
+    const R  = { x: 1,   y: 0.5 };
+    const LL = { x: 0,   y: 0.5 };
+    const T  = { x: 0.5, y: 0   };
+    const B  = { x: 0.5, y: 1   };
 
-    // Marketer → P1: campaign request + CTA URL params
-    await mkConn('marketer', 'p1',
-      'Campaign request + CTA URL params',
-      { color: RED, thick: true, sp: R, ep: LL });
+    await C('marketer','p1',  'Campaign request + CTA URL params', { color:RED,    thick:true, sp:R,  ep:LL });
+    await C('sfdc',    'p1',  'SFDC URL params (optional)',         { color:ORANGE, dashed:true,sp:B,  ep:T  });
+    await C('p1',      'd1',  'Store request',                      { color:GREEN,              sp:R,  ep:LL });
+    await C('p1',      'p2',  'Validated',                          { color:BLUE,   thick:true              });
+    await C('d2',      'p2',  'Lookup enrichment',                  { color:GREEN,  dashed:true,sp:LL, ep:R  });
+    await C('p2',      'd5',  'Generate content.js',                { color:PURPLE, dashed:true,sp:R,  ep:LL });
+    await C('p2',      'p3',  'Project ready',                      { color:BLUE,   thick:true              });
+    await C('p3',      'd5',  'Update JSON',                        { color:PURPLE,             sp:R,  ep:LL });
+    await C('p3',      'p4',  'Content ready',                      { color:PURPLE, thick:true              });
+    await C('d3',      'p4',  'Rules',                              { color:GREEN,  dashed:true,sp:LL, ep:R  });
+    await C('p4',      'p5',  'Approved',                           { color:GREEN,  thick:true              });
+    await C('opsTeam', 'p5',  'MCZ Review + SFDC task values',      { color:BLUE,               sp:R,  ep:LL });
+    await C('d4',      'p5',  'Taxonomy + shells',                  { color:GREEN,  dashed:true,sp:LL, ep:R  });
+    await C('d5',      'p5',  'content.js data',                    { color:PURPLE, dashed:true,sp:LL, ep:R  });
+    await C('p5',      'p6',  'Sync object',                        { color:ORANGE, thick:true, sp:R,  ep:LL });
+    await C('p6',      'marketo','Provision MCZ program',           { color:ORANGE, thick:true, sp:R,  ep:LL });
+    await C('marketo', 'p7',  'MCZ Response',                       { color:ORANGE,             sp:B,  ep:R  });
+    await C('p7',      'd1',  'Update status & MCZ links',          { color:PURPLE, dashed:true,sp:R,  ep:R  });
+    await C('p7',      'opsTeam','QA task activated',               { color:BLUE,               sp:LL, ep:B  });
 
-    // SFDC note → P1: optional SFDC URL params (dashed)
-    await mkConn('sfdc', 'p1',
-      'SFDC URL params (optional)',
-      { color: ORANGE, dashed: true, sp: B, ep: T });
-
-    // P1 → D1: store validated request
-    await mkConn('p1', 'd1',
-      'Store request',
-      { color: GREEN, sp: R, ep: LL });
-
-    // P1 → P2: validated request
-    await mkConn('p1', 'p2',
-      'Validated',
-      { color: BLUE, thick: true });
-
-    // D2 → P2: lookup enrichment (dashed)
-    await mkConn('d2', 'p2',
-      'Lookup enrichment',
-      { color: GREEN, dashed: true, sp: LL, ep: R });
-
-    // P2 → D5: generate content.js (dashed)
-    await mkConn('p2', 'd5',
-      'Generate content.js',
-      { color: PURPLE, dashed: true, sp: R, ep: LL });
-
-    // P2 → P3: project ready
-    await mkConn('p2', 'p3',
-      'Project ready',
-      { color: BLUE, thick: true });
-
-    // P3 → D5: update JSON
-    await mkConn('p3', 'd5',
-      'Update JSON',
-      { color: PURPLE, sp: R, ep: LL });
-
-    // P3 → P4: content ready
-    await mkConn('p3', 'p4',
-      'Content ready',
-      { color: PURPLE, thick: true });
-
-    // D3 → P4: validation rules (dashed)
-    await mkConn('d3', 'p4',
-      'Rules',
-      { color: GREEN, dashed: true, sp: LL, ep: R });
-
-    // P4 → P5: approved
-    await mkConn('p4', 'p5',
-      'Approved',
-      { color: GREEN, thick: true });
-
-    // Ops Team → P5: MCZ review + SFDC task values
-    await mkConn('opsTeam', 'p5',
-      'MCZ Review + SFDC task values',
-      { color: BLUE, sp: R, ep: LL });
-
-    // D4 → P5: taxonomy + shells (dashed)
-    await mkConn('d4', 'p5',
-      'Taxonomy + shells',
-      { color: GREEN, dashed: true, sp: LL, ep: R });
-
-    // D5 → P5: content.js data (dashed)
-    await mkConn('d5', 'p5',
-      'content.js data',
-      { color: PURPLE, dashed: true, sp: LL, ep: R });
-
-    // P5 → P6: sync object payload
-    await mkConn('p5', 'p6',
-      'Sync object',
-      { color: ORANGE, thick: true, sp: R, ep: LL });
-
-    // P6 → Marketo: provision MCZ program
-    await mkConn('p6', 'marketo',
-      'Provision MCZ program',
-      { color: ORANGE, thick: true, sp: R, ep: LL });
-
-    // Marketo → P7: MCZ response
-    await mkConn('marketo', 'p7',
-      'MCZ Response',
-      { color: ORANGE, sp: B, ep: R });
-
-    // P7 → D1: update status + MCZ links (dashed)
-    await mkConn('p7', 'd1',
-      'Update status & MCZ links',
-      { color: PURPLE, dashed: true, sp: R, ep: R });
-
-    // P7 → Ops Team: QA task activated
-    await mkConn('p7', 'opsTeam',
-      'QA task activated',
-      { color: BLUE, sp: LL, ep: B });
-
-    // ── DONE ──────────────────────────────────────────────────
-    console.log('✅  DFD created successfully!');
-    console.log('    Tip: Press Ctrl+Shift+H (Fit to screen) to see the full diagram.');
+    console.log('✅ DFD created! Press Ctrl+Shift+H to fit to screen.');
 
   } catch (err) {
-    console.error('❌  Error building DFD:', err.message || err);
-    if (err.stack) console.error(err.stack);
+    console.error('❌ Failed:', err.message || err);
   }
 
 })();
