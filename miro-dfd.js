@@ -69,12 +69,10 @@
         strokeColor    : opts.color  || '#666666',
         strokeWidth    : opts.thick  ? 3 : 2,
         strokeStyle    : opts.dashed ? 'dashed' : 'normal',
-        fontSize       : 10,
-        color          : opts.color  || '#555555',
       },
-      start    : { item: n[from], position: opts.sp || { x: 0.5, y: 1   } },
-      end      : { item: n[to],   position: opts.ep || { x: 0.5, y: 0   } },
-      captions : label ? [{ content: label, position: 0.5 }] : [],
+      start    : { item: n[from], position: opts.sp || { x: 0.5, y: 1 } },
+      end      : { item: n[to],   position: opts.ep || { x: 0.5, y: 0 } },
+      captions : label ? [{ content: label, position: 0.5, textAlignVertical: 'top' }] : [],
     });
   };
 
