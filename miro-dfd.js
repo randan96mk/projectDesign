@@ -52,7 +52,7 @@
           startStrokeCap : 'none',
           endStrokeCap   : 'arrow',
           strokeColor    : opts.color  || '#666666',
-          strokeWidth    : opts.thick  ? 2.5 : 1.8,
+          strokeWidth    : opts.thick  ? 3 : 2,
           strokeStyle    : opts.dashed ? 'dashed' : 'normal',
           fontSize       : 10,
           color          : opts.color  || '#555555',
@@ -233,7 +233,7 @@
         x: L[p.key].x, y: L[p.key].y,
         width: 248, height: 72,
         style: {
-          fillColor: '#FFFFFF', borderColor: p.color, borderWidth: 2.5,
+          fillColor: '#FFFFFF', borderColor: p.color, borderWidth: 3,
           borderStyle: 'normal', borderOpacity: 1, fillOpacity: 1,
           textAlign: 'center', textAlignVertical: 'middle',
           fontFamily: 'open_sans', fontSize: 12, color: '#1A1A1A',
