@@ -198,14 +198,14 @@
   │  ├── CTA 2 Email Body         (rich text)                 │
   │  ├── CTA 2 CTA Text           (open text)                 │
   │  ├── CTA 2 CTA URL            (open text)                 │
-  │  └── CTA 2 Content Image URL  (open text)                 │
+  │  └── CTA 2 Content Image      (open text)                 │
   ├───────────────────────────────────────────────────────────┤
   │  ADDITIONAL CTA 3  (shown when CTA count >= 3)            │
   │  ├── CTA 3 Email Headline     (open text)                 │
   │  ├── CTA 3 Email Body         (rich text)                 │
   │  ├── CTA 3 CTA Text           (open text)                 │
   │  ├── CTA 3 CTA URL            (open text)                 │
-  │  └── CTA 3 Content Image URL  (open text)                 │
+  │  └── CTA 3 Content Image      (open text)                 │
   ├───────────────────────────────────────────────────────────┤
   │  ADDITIONAL CTA 4  (shown when CTA count >= 4)            │
   │  └── [same 5 fields as CTA 2/3 pattern]                   │
@@ -244,7 +244,7 @@
   │                   (PL = Planning Link Connection between tables)                    │
   └─────────────────────────────────────────────────────────────────────────────────────┘
 
-  LOOKUP TABLES (Read-Only Reference Data – migrated from Airtable)
+  LOOKUP TABLES (Read-Only Reference Data – migrated from Airtable for APAC/AMER; EMEA continues on Airtable)
   ─────────────────────────────────────────────────────────────────
    ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
    │  Solutions      │  │  Industry       │  │  POI            │  │  Team           │

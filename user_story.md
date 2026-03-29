@@ -182,13 +182,13 @@
 
 ---
 
-### US-014: Migrate Airtable Lookup Tables to Workfront Planning
+### US-014: Migrate Airtable Lookup Tables to Workfront Planning (APAC/AMER)
 
-**Title:** Recreate all Airtable lookup tables within Workfront Planning
+**Title:** Recreate APAC/AMER Airtable lookup tables within Workfront Planning
 
 **As a** campaign operations architect,
-**I want** all existing Airtable lookup tables to be migrated and recreated within Workfront Planning,
-**So that** the campaign orchestration platform operates on a single, governed data platform and eliminates dependency on Airtable.
+**I want** all existing Airtable lookup tables for APAC and AMER regions to be migrated and recreated within Workfront Planning,
+**So that** the APAC/AMER campaign orchestration platform operates on a single, governed data platform. Note: EMEA region continues to use Airtable and is out of scope for this development phase.
 
 **Feature:** Data & Lookup Management
 **Task Reference:** Task 6
@@ -515,6 +515,26 @@
 
 ---
 
+### US-036b: SFDC Campaign ID as CTA URL Parameter (Marketer Direct Entry)
+
+**Title:** Capture SFDC Campaign ID URL parameters entered directly by the marketer in the intake form CTA URL fields
+
+**As a** marketer who already has Salesforce Campaign IDs,
+**I want** to embed SFDC tracking parameters (e.g. `s_rtid`, `s_iid`) directly as URL parameters within the Email Call-to-Action URL field(s) on the intake form,
+**So that** these values are captured as part of the campaign request data, stored in `content.js`, and automatically included in the MCZ sync object payload without requiring an additional operations task.
+
+**Acceptance Notes:**
+- The Email Call-to-Action URL field on the intake form accepts free-form text, allowing marketers to include SFDC URL parameters (e.g. `https://example.com?s_rtid=ABC123&s_iid=XYZ`)
+- This path is independent of the "Do you require Salesforce Campaign ID Creation?" checkbox — the checkbox is only required when the Ops team needs to create/assign new SFDC IDs
+- CTA URL values (including any embedded SFDC params) are captured into `content.js` via the standard task-change watch (Fusion S3)
+- The `sync-object-build` Adobe I/O action reads SFDC param values from `content.js` CTA URL fields and includes them in the MCZ payload per-CTA
+- No external Salesforce system connection or API call is made at any point
+
+**Feature:** Intake & Request Management / MCZ Integration & Provisioning
+**Task Reference:** Task 1, Task 16
+
+---
+
 ### US-037: Pre-Sync MCZ Details Review and Approval Cycle
 
 **Title:** Enable operations team review and iterative correction of MCZ details before final sync object submission
@@ -668,6 +688,7 @@
 | US-034 | MCZ Integration & Provisioning | Program Shell Lookup Table for Dynamic MCZ Generation |
 | US-035 | MCZ Integration & Provisioning | Tokens Lookup Table in Workfront Planning |
 | US-036 | MCZ Integration & Provisioning | SFDC Campaign ID Tracking Task in Operations Project |
+| US-036b | Intake & Request Management / MCZ Integration | SFDC Campaign ID as CTA URL Parameter (Marketer Direct Entry) |
 | US-037 | MCZ Integration & Provisioning | Pre-Sync MCZ Details Review and Approval Cycle |
 | US-038 | MCZ Integration & Provisioning | QA Task Initiation After MCZ Provisioning Success |
 | US-039 | Campaign Project Automation | Adobe I/O Action – Overview Build Script |

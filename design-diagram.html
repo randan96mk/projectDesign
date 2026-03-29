@@ -727,9 +727,9 @@
     </div>
     <div class="card">
       <div class="card-icon">&#128202;</div>
-      <h3>Airtable (Legacy)</h3>
-      <p>Legacy data source being migrated to Workfront Planning. Previously held lookup and taxonomy data.</p>
-      <span class="tag">Deprecating</span>
+      <h3>Airtable</h3>
+      <p>Active lookup data source for the <strong>EMEA region</strong>. APAC and AMER lookup tables have been migrated to Workfront Planning. EMEA is out of scope for the current development phase.</p>
+      <span class="tag">EMEA Active</span>
     </div>
   </div>
 </section>
@@ -862,9 +862,10 @@
       <text x="330" y="661" text-anchor="middle" font-size="9" fill="#888">s_rtid · s_iid · gated flag · button type</text>
       <text x="330" y="677" text-anchor="middle" font-size="9" fill="#AAA">Intake form fields or Ops task — no API</text>
 
-      <rect x="560" y="630" width="220" height="54" rx="8" fill="#fff" stroke="#0D97A5" stroke-width="1.5" filter="url(#ds)" stroke-dasharray="6,3"/>
-      <text x="670" y="653" text-anchor="middle" font-size="12" font-weight="700" fill="#999">Airtable (Legacy)</text>
-      <text x="670" y="669" text-anchor="middle" font-size="10" fill="#bbb">Migrating to Planning</text>
+      <rect x="560" y="630" width="220" height="54" rx="8" fill="#fff" stroke="#0D97A5" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="670" y="648" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Airtable</text>
+      <text x="670" y="664" text-anchor="middle" font-size="10" fill="#0D97A5" font-weight="600">EMEA Active</text>
+      <text x="670" y="677" text-anchor="middle" font-size="9" fill="#888">APAC/AMER migrated to Planning</text>
 
       <!-- ── CONNECTION LINES ─────────────────────────── -->
       <!-- Workfront → Fusion -->
@@ -904,8 +905,9 @@
       <path d="M330,689 L330,700 L450,700 L450,453" stroke="#AAA" stroke-width="1" fill="none" stroke-dasharray="4,4" marker-end="url(#ah)"/>
       <text x="394" y="698" text-anchor="middle" font-size="8" fill="#AAA">consumed by sync-object-build</text>
 
-      <!-- Airtable → Planning (migration) -->
-      <path d="M670,630 L670,460 L700,460" stroke="#999" stroke-width="1" fill="none" stroke-dasharray="4,4" marker-end="url(#ah)"/>
+      <!-- Airtable → Planning (APAC/AMER migrated; EMEA still on Airtable) -->
+      <path d="M670,630 L670,460 L700,460" stroke="#0D97A5" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#ah)"/>
+      <text x="685" y="545" font-size="8" fill="#0D97A5" font-weight="600" transform="rotate(-90,685,545)">APAC/AMER migrated</text>
 
       <!-- ── LEGEND BOX ──────────────────────────────── -->
       <rect x="860" y="620" width="220" height="80" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/>
