@@ -32,12 +32,11 @@
   const shapeStyle = (fill, border, bw, textColor, fs, align) => ({
     fillColor         : fill,
     borderColor       : border,
-    borderWidth       : Math.round(bw),   // guarantee integer
+    borderWidth       : Math.round(bw),
     borderStyle       : 'normal',
     textAlign         : align || 'center',
     textAlignVertical : 'middle',
-    fontFamily        : 'open_sans',
-    fontSize          : Math.round(fs),   // guarantee integer
+    fontSize          : Math.round(fs),
     color             : textColor,
   });
 
@@ -48,7 +47,6 @@
     borderStyle       : 'dashed',
     textAlign         : 'center',
     textAlignVertical : 'middle',
-    fontFamily        : 'open_sans',
     fontSize          : Math.round(fs),
     color             : textColor,
   });
@@ -73,7 +71,6 @@
         strokeStyle    : opts.dashed ? 'dashed' : 'normal',
         fontSize       : 10,
         color          : opts.color  || '#555555',
-        fontFamily     : 'open_sans',
       },
       start    : { item: n[from], position: opts.sp || { x: 0.5, y: 1   } },
       end      : { item: n[to],   position: opts.ep || { x: 0.5, y: 0   } },
@@ -116,7 +113,7 @@
     await b.createText({
       content : 'Campaign Orchestration Platform — Data Flow Diagram (DFD)\nLevel-1 DFD  ·  APAC / AMER scope  ·  Adobe Campaign Orchestration',
       x: 50, y: -680, width: 900,
-      style: { textAlign: 'center', fontSize: 18, color: DARK, fontFamily: 'open_sans' },
+      style: { textAlign: 'center', fontSize: 18, color: DARK },
     });
 
     // ── LEGEND ──────────────────────────────────────────────
