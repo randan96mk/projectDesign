@@ -187,11 +187,11 @@
   │  ├── Subject Line             (open text)                 │
   │  ├── Preview Text             (open text)                 │
   │  ├── Email Headline           (open text)                 │
-  │  ├── Email Banner Image URL   (open text)                 │
+  │  ├── Email Banner Image       (open text)                 │
   │  ├── Email Body               (rich text)                 │
-  │  ├── Content Image URL        (open text)                 │
-  │  ├── CTA Text                 (open text)                 │
-  │  └── CTA URL                  (open text)                 │
+  │  ├── Content Image            (open text)                 │
+  │  ├── Email Call-to-Action Text (open text)                │
+  │  └── Email Call-to-Action URL  (open text)                │
   ├───────────────────────────────────────────────────────────┤
   │  ADDITIONAL CTA 2  (shown when CTA count >= 2)            │
   │  ├── CTA 2 Email Headline     (open text)                 │

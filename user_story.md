@@ -135,7 +135,7 @@
 **Title:** Allow marketers to submit multi-CTA campaign content during intake form
 
 **As a** marketer with ready content for a multi-CTA email campaign,
-**I want** to select "Add content now", choose CTA Type as Multi CTA, select the number of CTAs (2–7), and have content sections dynamically generated per CTA,
+**I want** to select "Add content now", choose CTA Type as Multi CTA, select the number of CTAs (2–5), and have content sections dynamically generated per CTA,
 **So that** I can provide all campaign content upfront and have it validated during the request submission process.
 
 **Feature:** Intake & Request Management
