@@ -520,7 +520,7 @@ Epic: Campaign Orchestration Platform Build
 | Payload Format | JSON (sync object, content.js, API responses) |
 | UI Design Reference | Miro |
 | Taxonomy Reference | SharePoint Excel |
-| SFDC Integration | Salesforce (via tracking IDs in sync object) |
+| SFDC Tracking Values | Intake form CTA URL params (s_rtid, s_iid, gated flag, button type) entered by marketer, or supplied by Ops team in auto-created SFDC Tracking task — no external Salesforce system connection |
 
 ---
 
