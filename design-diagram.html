@@ -362,6 +362,96 @@
   }
   .pl-connector svg { flex-shrink: 0; }
 
+  /* ── Sticky Nav ──────────────────────────────────────────── */
+  .sticky-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--adobe-white);
+    border-bottom: 1px solid #E0E0E0;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 10px 16px;
+  }
+  .sticky-nav a {
+    text-decoration: none;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--adobe-gray);
+    padding: 6px 14px;
+    border-radius: 20px;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .sticky-nav a:hover {
+    background: var(--adobe-red);
+    color: var(--adobe-white);
+  }
+
+  /* ── Section Heading ───────────────────────────────────── */
+  .section-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-top: 24px;
+  }
+  .section-heading .sh-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    color: #fff;
+  }
+  .section-heading h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -.3px;
+  }
+  .section-heading .sh-sub {
+    font-size: .82rem;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  /* ── Tooltip on cards ──────────────────────────────────── */
+  .card[data-tooltip] { cursor: default; }
+  .card[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--adobe-dark);
+    color: #fff;
+    font-size: .72rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  }
+
+  /* ── Diagram Container ─────────────────────────────────── */
+  .diagram-container {
+    background: var(--adobe-white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px 24px;
+    overflow-x: auto;
+  }
+  .diagram-container svg { display: block; margin: 0 auto; }
+
+  /* scroll-margin for anchor nav */
+  section[id] { scroll-margin-top: 60px; }
+
   /* ── Footer ────────────────────────────────────────────── */
   footer {
     text-align: center;
@@ -381,6 +471,7 @@
     .pl-grid { grid-template-columns: 1fr; }
     .pl-connector { transform: rotate(90deg); }
     .scenario-table { font-size: .78rem; }
+    .sticky-nav a { font-size: .7rem; padding: 5px 10px; }
   }
 </style>
 </head>
@@ -391,6 +482,16 @@
   <h1><span>Adobe</span> Campaign Orchestration Platform</h1>
   <p>End-to-end marketing automation — from intake request to Marketo provisioning across APAC, AMER &amp; EMEA regions</p>
 </header>
+
+<!-- ═══════════ NAVIGATION ═══════════ -->
+<nav class="sticky-nav">
+  <a href="#layers">Layer Overview</a>
+  <a href="#architecture">System Architecture</a>
+  <a href="#dfd">Data Flow Diagram</a>
+  <a href="#e2e-flow">End-to-End Flow</a>
+  <a href="#scenarios">Fusion Scenarios</a>
+  <a href="#pl-connections">PL Connections</a>
+</nav>
 
 <!-- ═══════════ LEGEND ═══════════ -->
 <div class="legend">
@@ -407,7 +508,7 @@
 <!-- ╔══════════════════════════════════════════════════════╗
      ║  LAYER 1 — INTAKE                                   ║
      ╚══════════════════════════════════════════════════════╝ -->
-<section class="layer layer--intake">
+<section id="layers" class="layer layer--intake">
   <div class="layer-header">
     <div class="layer-badge">1</div>
     <div>
@@ -416,7 +517,7 @@
     </div>
   </div>
   <div class="card-grid">
-    <div class="card">
+    <div class="card" data-tooltip="Adobe ecosystem — project management &amp; intake forms">
       <div class="card-icon">&#128221;</div>
       <h3>Adobe Workfront</h3>
       <p>Standardised intake request forms with dynamic fields for APAC &amp; AMER regions. Supports single &amp; multi-CTA campaigns (up to 5 CTAs).</p>
@@ -454,7 +555,7 @@
     </div>
   </div>
   <div class="card-grid">
-    <div class="card">
+    <div class="card" data-tooltip="Adobe ecosystem — iPaaS automation engine">
       <div class="card-icon">&#9889;</div>
       <h3>Workfront Fusion</h3>
       <p>Seven scenarios (S1–S7) watch for events, trigger project creation, monitor tasks, build sync objects, and process responses.</p>
@@ -586,13 +687,13 @@
     </div>
   </div>
   <div class="card-grid">
-    <div class="card">
+    <div class="card" data-tooltip="Middleware — transforms &amp; routes MCZ payloads">
       <div class="card-icon">&#128256;</div>
       <h3>SnapLogic</h3>
       <p>API gateway / middleware that receives MCZ sync object payloads, transforms data, and forwards to Marketo API.</p>
       <span class="tag">API Gateway</span>
     </div>
-    <div class="card">
+    <div class="card" data-tooltip="Adobe ecosystem — marketing automation target">
       <div class="card-icon">&#127919;</div>
       <h3>Adobe Marketo (MCZ)</h3>
       <p>Marketing automation platform. Receives provisioned campaign programs, tokens, and smart-campaign configurations.</p>
@@ -636,7 +737,7 @@
 <!-- ═══════════════════════════════════════════════════════
      END-TO-END DATA FLOW
      ═══════════════════════════════════════════════════════ -->
-<section class="flow-section">
+<section id="e2e-flow" class="flow-section">
   <h2>End-to-End Data Flow</h2>
   <div class="flow-pipeline">
 
@@ -744,7 +845,7 @@
 <!-- ═══════════════════════════════════════════════════════
      FUSION SCENARIO REFERENCE
      ═══════════════════════════════════════════════════════ -->
-<section class="scenario-section">
+<section id="scenarios" class="scenario-section">
   <h2>Workfront Fusion Scenarios</h2>
   <div style="overflow-x:auto;">
   <table class="scenario-table">
@@ -807,7 +908,7 @@
 <!-- ═══════════════════════════════════════════════════════
      PL CONNECTION MAP
      ═══════════════════════════════════════════════════════ -->
-<section class="pl-section">
+<section id="pl-connections" class="pl-section">
   <h2>Planning Link (PL) Connections</h2>
 
   <div class="pl-grid">
