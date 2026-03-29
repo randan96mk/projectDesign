@@ -735,6 +735,189 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════
+     SYSTEM ARCHITECTURE DIAGRAM
+     ═══════════════════════════════════════════════════════ -->
+<section id="architecture" style="margin-top:52px;">
+  <div class="section-heading">
+    <div class="sh-icon" style="background:var(--adobe-dark);">&#127959;</div>
+    <div>
+      <h2>System Architecture Diagram</h2>
+      <div class="sh-sub">All components, tools, services, and their interconnections</div>
+    </div>
+  </div>
+  <div class="diagram-container">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 820" width="100%" style="max-width:1100px;font-family:inherit;">
+      <defs>
+        <marker id="ah" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#999"/></marker>
+        <marker id="ah-red" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#FA0F00"/></marker>
+        <marker id="ah-blue" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1473E6"/></marker>
+        <marker id="ah-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#7C3AED"/></marker>
+        <marker id="ah-orange" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#E68619"/></marker>
+        <marker id="ah-green" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#12805C"/></marker>
+        <filter id="ds" x="-4%" y="-4%" width="108%" height="116%"><feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.10"/></filter>
+      </defs>
+
+      <!-- ── LAYER BANDS ──────────────────────────────── -->
+      <!-- Intake -->
+      <rect x="10" y="10" width="1080" height="100" rx="10" fill="#FFF0EF" stroke="#FA0F00" stroke-width="1.5" opacity=".45"/>
+      <text x="24" y="34" font-size="11" font-weight="700" fill="#FA0F00" text-transform="uppercase">INTAKE &amp; REQUEST LAYER</text>
+
+      <!-- Orchestration -->
+      <rect x="10" y="125" width="1080" height="100" rx="10" fill="#E8F1FC" stroke="#1473E6" stroke-width="1.5" opacity=".45"/>
+      <text x="24" y="149" font-size="11" font-weight="700" fill="#1473E6">ORCHESTRATION LAYER</text>
+
+      <!-- Business Logic -->
+      <rect x="10" y="240" width="1080" height="110" rx="10" fill="#F1ECFE" stroke="#7C3AED" stroke-width="1.5" opacity=".45"/>
+      <text x="24" y="264" font-size="11" font-weight="700" fill="#7C3AED">BUSINESS LOGIC — ADOBE I/O RUNTIME</text>
+
+      <!-- Data -->
+      <rect x="10" y="365" width="1080" height="110" rx="10" fill="#E6F5F0" stroke="#12805C" stroke-width="1.5" opacity=".45"/>
+      <text x="24" y="389" font-size="11" font-weight="700" fill="#12805C">DATA &amp; ENRICHMENT — WORKFRONT PLANNING</text>
+
+      <!-- Integration -->
+      <rect x="10" y="490" width="1080" height="100" rx="10" fill="#FEF3E2" stroke="#E68619" stroke-width="1.5" opacity=".45"/>
+      <text x="24" y="514" font-size="11" font-weight="700" fill="#E68619">INTEGRATION LAYER</text>
+
+      <!-- External -->
+      <rect x="10" y="605" width="1080" height="100" rx="10" fill="#E2F5F7" stroke="#0D97A5" stroke-width="1.5" opacity=".45"/>
+      <text x="24" y="629" font-size="11" font-weight="700" fill="#0D97A5">EXTERNAL SYSTEMS</text>
+
+      <!-- ── COMPONENT NODES ──────────────────────────── -->
+      <!-- Intake nodes -->
+      <rect x="80" y="42" width="180" height="54" rx="8" fill="#fff" stroke="#FA0F00" stroke-width="2" filter="url(#ds)"/>
+      <text x="170" y="65" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Adobe Workfront</text>
+      <text x="170" y="82" text-anchor="middle" font-size="10" fill="#888">Intake Forms &amp; Projects</text>
+
+      <rect x="330" y="42" width="140" height="54" rx="8" fill="#fff" stroke="#FA0F00" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="400" y="65" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Miro</text>
+      <text x="400" y="82" text-anchor="middle" font-size="10" fill="#888">UI Design</text>
+
+      <rect x="540" y="42" width="180" height="54" rx="8" fill="#fff" stroke="#FA0F00" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="630" y="65" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">SharePoint Excel</text>
+      <text x="630" y="82" text-anchor="middle" font-size="10" fill="#888">Taxonomy Reference</text>
+
+      <!-- Orchestration nodes -->
+      <rect x="60" y="148" width="220" height="62" rx="8" fill="#fff" stroke="#1473E6" stroke-width="2" filter="url(#ds)"/>
+      <text x="170" y="173" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Workfront Fusion</text>
+      <text x="170" y="190" text-anchor="middle" font-size="10" fill="#888">Scenarios S1 – S7</text>
+
+      <rect x="350" y="148" width="200" height="62" rx="8" fill="#fff" stroke="#1473E6" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="450" y="173" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">content.js</text>
+      <text x="450" y="190" text-anchor="middle" font-size="10" fill="#888">Versioned JSON Document</text>
+
+      <rect x="620" y="148" width="200" height="62" rx="8" fill="#fff" stroke="#1473E6" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="720" y="173" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Project Templates</text>
+      <text x="720" y="190" text-anchor="middle" font-size="10" fill="#888">Marketer &amp; Ops</text>
+
+      <!-- Business Logic nodes -->
+      <rect x="40" y="272" width="160" height="56" rx="8" fill="#fff" stroke="#7C3AED" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="120" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#2C2C2C">overview-build</text>
+      <text x="120" y="312" text-anchor="middle" font-size="9" fill="#888">Request overviews</text>
+
+      <rect x="225" y="272" width="175" height="56" rx="8" fill="#fff" stroke="#7C3AED" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="312" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#2C2C2C">validation-summary</text>
+      <text x="312" y="312" text-anchor="middle" font-size="9" fill="#888">Rules evaluation</text>
+
+      <rect x="425" y="272" width="190" height="56" rx="8" fill="#fff" stroke="#7C3AED" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="520" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#2C2C2C">overview-summary-ops</text>
+      <text x="520" y="312" text-anchor="middle" font-size="9" fill="#888">Ops-level summaries</text>
+
+      <rect x="640" y="272" width="175" height="56" rx="8" fill="#fff" stroke="#7C3AED" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="727" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#2C2C2C">sync-object-build</text>
+      <text x="727" y="312" text-anchor="middle" font-size="9" fill="#888">MCZ payload</text>
+
+      <rect x="840" y="272" width="220" height="56" rx="8" fill="#fff" stroke="#7C3AED" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="950" y="296" text-anchor="middle" font-size="11" font-weight="700" fill="#2C2C2C">snaplogic-response-proc</text>
+      <text x="950" y="312" text-anchor="middle" font-size="9" fill="#888">Response decoder</text>
+
+      <!-- Data nodes -->
+      <rect x="50" y="397" width="210" height="56" rx="8" fill="#fff" stroke="#12805C" stroke-width="2" filter="url(#ds)"/>
+      <text x="155" y="421" text-anchor="middle" font-size="11" font-weight="700" fill="#2C2C2C">Campaign Request Table</text>
+      <text x="155" y="437" text-anchor="middle" font-size="9" fill="#888">Core request storage</text>
+
+      <rect x="290" y="397" width="200" height="56" rx="8" fill="#fff" stroke="#12805C" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="390" y="421" text-anchor="middle" font-size="11" font-weight="700" fill="#2C2C2C">Lookup Tables (4)</text>
+      <text x="390" y="437" text-anchor="middle" font-size="9" fill="#888">Solutions, Industry, POI, Team</text>
+
+      <rect x="520" y="397" width="180" height="56" rx="8" fill="#fff" stroke="#12805C" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="610" y="421" text-anchor="middle" font-size="11" font-weight="700" fill="#2C2C2C">Validation Rules</text>
+      <text x="610" y="437" text-anchor="middle" font-size="9" fill="#888">Region-specific</text>
+
+      <rect x="730" y="397" width="210" height="56" rx="8" fill="#fff" stroke="#12805C" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="835" y="421" text-anchor="middle" font-size="11" font-weight="700" fill="#2C2C2C">MCZ Taxonomy &amp; Shells</text>
+      <text x="835" y="437" text-anchor="middle" font-size="9" fill="#888">Tokens &amp; program templates</text>
+
+      <!-- Integration nodes -->
+      <rect x="200" y="518" width="220" height="54" rx="8" fill="#fff" stroke="#E68619" stroke-width="2" filter="url(#ds)"/>
+      <text x="310" y="541" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">SnapLogic</text>
+      <text x="310" y="557" text-anchor="middle" font-size="10" fill="#888">API Gateway / Middleware</text>
+
+      <rect x="560" y="518" width="260" height="54" rx="8" fill="#fff" stroke="#E68619" stroke-width="2" filter="url(#ds)"/>
+      <text x="690" y="541" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Adobe Marketo (MCZ)</text>
+      <text x="690" y="557" text-anchor="middle" font-size="10" fill="#888">Marketing Automation Platform</text>
+
+      <!-- External nodes -->
+      <rect x="200" y="630" width="220" height="54" rx="8" fill="#fff" stroke="#0D97A5" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="310" y="653" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Salesforce</text>
+      <text x="310" y="669" text-anchor="middle" font-size="10" fill="#888">CRM — SFDC Campaign IDs</text>
+
+      <rect x="560" y="630" width="220" height="54" rx="8" fill="#fff" stroke="#0D97A5" stroke-width="1.5" filter="url(#ds)" stroke-dasharray="6,3"/>
+      <text x="670" y="653" text-anchor="middle" font-size="12" font-weight="700" fill="#999">Airtable (Legacy)</text>
+      <text x="670" y="669" text-anchor="middle" font-size="10" fill="#bbb">Migrating to Planning</text>
+
+      <!-- ── CONNECTION LINES ─────────────────────────── -->
+      <!-- Workfront → Fusion -->
+      <line x1="170" y1="96" x2="170" y2="148" stroke="#FA0F00" stroke-width="2" marker-end="url(#ah-red)"/>
+      <!-- SharePoint → Fusion (taxonomy feeds) -->
+      <path d="M630,96 L630,130 L280,130 L280,148" stroke="#FA0F00" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#ah-red)"/>
+
+      <!-- Fusion → content.js -->
+      <line x1="280" y1="179" x2="350" y2="179" stroke="#1473E6" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <!-- Fusion → Templates -->
+      <line x1="280" y1="179" x2="620" y2="179" stroke="#1473E6" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+
+      <!-- Fusion → I/O Actions -->
+      <line x1="120" y1="210" x2="120" y2="272" stroke="#1473E6" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <line x1="170" y1="210" x2="312" y2="272" stroke="#1473E6" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <line x1="200" y1="210" x2="520" y2="272" stroke="#1473E6" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#ah-blue)"/>
+      <line x1="230" y1="210" x2="727" y2="272" stroke="#1473E6" stroke-width="1.5" marker-end="url(#ah-blue)"/>
+      <line x1="250" y1="210" x2="950" y2="272" stroke="#1473E6" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#ah-blue)"/>
+
+      <!-- I/O Actions → Data Layer -->
+      <line x1="120" y1="328" x2="155" y2="397" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#ah-purple)"/>
+      <line x1="312" y1="328" x2="610" y2="397" stroke="#7C3AED" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#ah-purple)"/>
+      <line x1="727" y1="328" x2="835" y2="397" stroke="#7C3AED" stroke-width="1.5" marker-end="url(#ah-purple)"/>
+      <line x1="520" y1="328" x2="390" y2="397" stroke="#7C3AED" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#ah-purple)"/>
+
+      <!-- sync-object-build → SnapLogic -->
+      <path d="M727,328 L727,360 L310,360 L310,518" stroke="#E68619" stroke-width="2" fill="none" marker-end="url(#ah-orange)"/>
+
+      <!-- SnapLogic → Marketo -->
+      <line x1="420" y1="545" x2="560" y2="545" stroke="#E68619" stroke-width="2" marker-end="url(#ah-orange)"/>
+
+      <!-- Response processor → Marketo (dashed feedback) -->
+      <path d="M950,328 L950,490 L820,530 L820,540" stroke="#7C3AED" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#ah-purple)"/>
+
+      <!-- Workfront → Salesforce -->
+      <path d="M170,96 L170,120 L80,120 L80,657 L200,657" stroke="#0D97A5" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#ah)"/>
+
+      <!-- Airtable → Planning (migration) -->
+      <path d="M670,630 L670,460 L700,460" stroke="#999" stroke-width="1" fill="none" stroke-dasharray="4,4" marker-end="url(#ah)"/>
+
+      <!-- ── LEGEND BOX ──────────────────────────────── -->
+      <rect x="860" y="620" width="220" height="80" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/>
+      <text x="875" y="640" font-size="10" font-weight="700" fill="#2C2C2C">Connection Legend</text>
+      <line x1="875" y1="653" x2="915" y2="653" stroke="#1473E6" stroke-width="2"/>
+      <text x="922" y="657" font-size="9" fill="#666">Direct invocation</text>
+      <line x1="875" y1="672" x2="915" y2="672" stroke="#999" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="922" y="676" font-size="9" fill="#666">Data flow / feedback</text>
+      <line x1="875" y1="691" x2="915" y2="691" stroke="#999" stroke-width="1" stroke-dasharray="4,4"/>
+      <text x="922" y="695" font-size="9" fill="#999">Migration / legacy</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════
      END-TO-END DATA FLOW
      ═══════════════════════════════════════════════════════ -->
 <section id="e2e-flow" class="flow-section">
