@@ -482,7 +482,7 @@ Epic: Campaign Orchestration Platform Build
 │   └── Task 5: Fusion/Adobe I/O – Request Overview Generation
 │
 ├── Feature: Data & Lookup Management
-│   └── Task 6: Migrate Lookup Tables from Airtable to Workfront Planning
+│   └── Task 6: Migrate Lookup Tables from Airtable to Workfront Planning (APAC/AMER scope)
 │
 ├── Feature: Validation Framework
 │   ├── Task 7: Validation Rules Lookup Table
@@ -516,11 +516,11 @@ Epic: Campaign Orchestration Platform Build
 | Campaign Content JSON Document | Workfront Document (content.js, versioned) |
 | Middleware / API Gateway | SnapLogic |
 | Marketing Automation Platform | Adobe Marketo (MCZ) |
-| Legacy Lookup Source | Airtable (being migrated) |
+| Lookup Source (EMEA) | Airtable (active for EMEA region; APAC/AMER lookup tables migrated to Workfront Planning) |
 | Payload Format | JSON (sync object, content.js, API responses) |
 | UI Design Reference | Miro |
 | Taxonomy Reference | SharePoint Excel |
-| SFDC Integration | Salesforce (via tracking IDs in sync object) |
+| SFDC Tracking Values | Intake form CTA URL params (s_rtid, s_iid, gated flag, button type) entered by marketer, or supplied by Ops team in auto-created SFDC Tracking task — no external Salesforce system connection |
 
 ---
 
@@ -544,7 +544,7 @@ Epic: Campaign Orchestration Platform Build
 - [ ] All 5 Adobe I/O actions tested with JSON input/output validation
 - [ ] content.js correctly created and versioned as Workfront Document on Content task
 - [ ] Planning request table populated with parent/child linking and PL enrichment verified
-- [ ] All lookup tables (Solutions, Industry, POI, Team, Validation Rules, Messages, MCZ Taxonomy, Tokens, Program Shell) migrated from Airtable and validated
+- [ ] All lookup tables (Solutions, Industry, POI, Team, Validation Rules, Messages, MCZ Taxonomy, Tokens, Program Shell) migrated from Airtable to Workfront Planning and validated (APAC/AMER scope; EMEA remains on Airtable)
 - [ ] PL connections verified: enrichment flows automatically on field value changes
 - [ ] MCZ pre-sync review cycle tested (build → review → correction → resubmit → approve)
 - [ ] MCZ payloads successfully processed via SnapLogic; MCZ programs provisioned in Marketo

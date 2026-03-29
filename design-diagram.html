@@ -720,16 +720,16 @@
   </div>
   <div class="card-grid">
     <div class="card">
-      <div class="card-icon">&#9729;&#65039;</div>
-      <h3>Salesforce</h3>
-      <p>CRM integration for optional SFDC Campaign ID tracking. IDs embedded in sync objects for cross-platform attribution.</p>
-      <span class="tag">CRM</span>
+      <div class="card-icon">&#128279;</div>
+      <h3>SFDC Tracking Values</h3>
+      <p>Salesforce Campaign ID (s_rtid), Internal ID (s_iid), gated/ungated flag, and button type are entered directly as CTA URL parameters in the intake form by the marketer — or supplied by the Operations team inside a dedicated <strong>SFDC Tracking task</strong> (auto-created by Fusion when the checkbox is checked). No external Salesforce system connection exists.</p>
+      <span class="tag">Form Fields / Ops Task</span>
     </div>
     <div class="card">
       <div class="card-icon">&#128202;</div>
-      <h3>Airtable (Legacy)</h3>
-      <p>Legacy data source being migrated to Workfront Planning. Previously held lookup and taxonomy data.</p>
-      <span class="tag">Deprecating</span>
+      <h3>Airtable</h3>
+      <p>Active lookup data source for the <strong>EMEA region</strong>. APAC and AMER lookup tables have been migrated to Workfront Planning. EMEA is out of scope for the current development phase.</p>
+      <span class="tag">EMEA Active</span>
     </div>
   </div>
 </section>
@@ -857,13 +857,15 @@
       <text x="690" y="557" text-anchor="middle" font-size="10" fill="#888">Marketing Automation Platform</text>
 
       <!-- External nodes -->
-      <rect x="200" y="630" width="220" height="54" rx="8" fill="#fff" stroke="#0D97A5" stroke-width="1.5" filter="url(#ds)"/>
-      <text x="310" y="653" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Salesforce</text>
-      <text x="310" y="669" text-anchor="middle" font-size="10" fill="#888">CRM — SFDC Campaign IDs</text>
+      <rect x="200" y="623" width="260" height="66" rx="8" fill="#F9F9F9" stroke="#AAAAAA" stroke-width="1.5" stroke-dasharray="5,3" filter="url(#ds)"/>
+      <text x="330" y="645" text-anchor="middle" font-size="11" font-weight="700" fill="#555">SFDC Tracking Values</text>
+      <text x="330" y="661" text-anchor="middle" font-size="9" fill="#888">s_rtid · s_iid · gated flag · button type</text>
+      <text x="330" y="677" text-anchor="middle" font-size="9" fill="#AAA">Intake form fields or Ops task — no API</text>
 
-      <rect x="560" y="630" width="220" height="54" rx="8" fill="#fff" stroke="#0D97A5" stroke-width="1.5" filter="url(#ds)" stroke-dasharray="6,3"/>
-      <text x="670" y="653" text-anchor="middle" font-size="12" font-weight="700" fill="#999">Airtable (Legacy)</text>
-      <text x="670" y="669" text-anchor="middle" font-size="10" fill="#bbb">Migrating to Planning</text>
+      <rect x="560" y="630" width="220" height="54" rx="8" fill="#fff" stroke="#0D97A5" stroke-width="1.5" filter="url(#ds)"/>
+      <text x="670" y="648" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Airtable</text>
+      <text x="670" y="664" text-anchor="middle" font-size="10" fill="#0D97A5" font-weight="600">EMEA Active</text>
+      <text x="670" y="677" text-anchor="middle" font-size="9" fill="#888">APAC/AMER migrated to Planning</text>
 
       <!-- ── CONNECTION LINES ─────────────────────────── -->
       <!-- Workfront → Fusion -->
@@ -898,11 +900,14 @@
       <!-- Response processor → Marketo (dashed feedback) -->
       <path d="M950,328 L950,490 L820,530 L820,540" stroke="#7C3AED" stroke-width="1.5" fill="none" stroke-dasharray="5,3" marker-end="url(#ah-purple)"/>
 
-      <!-- Workfront → Salesforce -->
-      <path d="M170,96 L170,120 L80,120 L80,657 L200,657" stroke="#0D97A5" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#ah)"/>
+      <!-- SFDC values flow: Intake form CTA URLs → Workfront → content.js (no Salesforce API) -->
+      <!-- Marketer enters SFDC URL params directly in intake form; Ops task fills remaining fields -->
+      <path d="M330,689 L330,700 L450,700 L450,453" stroke="#AAA" stroke-width="1" fill="none" stroke-dasharray="4,4" marker-end="url(#ah)"/>
+      <text x="394" y="698" text-anchor="middle" font-size="8" fill="#AAA">consumed by sync-object-build</text>
 
-      <!-- Airtable → Planning (migration) -->
-      <path d="M670,630 L670,460 L700,460" stroke="#999" stroke-width="1" fill="none" stroke-dasharray="4,4" marker-end="url(#ah)"/>
+      <!-- Airtable → Planning (APAC/AMER migrated; EMEA still on Airtable) -->
+      <path d="M670,630 L670,460 L700,460" stroke="#0D97A5" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#ah)"/>
+      <text x="685" y="545" font-size="8" fill="#0D97A5" font-weight="600" transform="rotate(-90,685,545)">APAC/AMER migrated</text>
 
       <!-- ── LEGEND BOX ──────────────────────────────── -->
       <rect x="860" y="620" width="220" height="80" rx="8" fill="#fff" stroke="#ddd" stroke-width="1"/>
@@ -951,10 +956,13 @@
       <text x="115" y="566" text-anchor="middle" font-size="12" font-weight="700" fill="#1473E6">Operations Team</text>
       <text x="115" y="582" text-anchor="middle" font-size="9" fill="#888">MCZ Review &amp; QA</text>
 
-      <!-- Salesforce -->
-      <rect x="910" y="40" width="160" height="60" rx="6" fill="#E2F5F7" stroke="#0D97A5" stroke-width="2" filter="url(#dfd-ds)"/>
-      <text x="990" y="66" text-anchor="middle" font-size="12" font-weight="700" fill="#0D97A5">Salesforce</text>
-      <text x="990" y="82" text-anchor="middle" font-size="9" fill="#888">CRM System</text>
+      <!-- NOTE: No Salesforce system connection. SFDC values come from intake form fields and Ops task. -->
+      <!-- Placeholder note box to explain SFDC handling -->
+      <rect x="870" y="30" width="210" height="80" rx="6" fill="#FFFDE7" stroke="#E68619" stroke-width="1" stroke-dasharray="5,3"/>
+      <text x="975" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="#E68619">SFDC Values</text>
+      <text x="975" y="68" text-anchor="middle" font-size="8" fill="#888">Entered by marketer in</text>
+      <text x="975" y="80" text-anchor="middle" font-size="8" fill="#888">CTA URL fields (intake form)</text>
+      <text x="975" y="92" text-anchor="middle" font-size="8" fill="#AAA">No Salesforce API call</text>
 
       <!-- Marketo output -->
       <rect x="910" y="540" width="160" height="60" rx="6" fill="#FEF3E2" stroke="#E68619" stroke-width="2" filter="url(#dfd-ds)"/>
@@ -1062,9 +1070,9 @@
       <line x1="200" y1="70" x2="308" y2="70" stroke="#FA0F00" stroke-width="2" marker-end="url(#dfd-ar)"/>
       <text x="254" y="62" text-anchor="middle" font-size="8" fill="#FA0F00" font-weight="600">Request data</text>
 
-      <!-- SFDC → P1: campaign ID -->
-      <line x1="910" y1="70" x2="552" y2="70" stroke="#0D97A5" stroke-width="1.5" marker-end="url(#dfd-a)" stroke-dasharray="5,3"/>
-      <text x="730" y="62" text-anchor="middle" font-size="8" fill="#0D97A5" font-weight="600">SFDC Campaign ID</text>
+      <!-- SFDC URL params included in marketer's CTA URL fields → flow into intake form data -->
+      <path d="M870,70 L555,70" stroke="#E68619" stroke-width="1.2" fill="none" stroke-dasharray="4,3" marker-end="url(#dfd-ao)"/>
+      <text x="712" y="62" text-anchor="middle" font-size="8" fill="#E68619" font-weight="600">SFDC URL params (in CTA fields)</text>
 
       <!-- P1 → D1: store validated request -->
       <line x1="550" y1="70" x2="640" y2="70" stroke="#555" stroke-width="0" fill="none"/>
@@ -1105,9 +1113,10 @@
       <line x1="430" y1="500" x2="430" y2="548" stroke="#12805C" stroke-width="2" marker-end="url(#dfd-ag)"/>
       <text x="455" y="528" font-size="8" fill="#12805C" font-weight="600">Approved</text>
 
-      <!-- Ops Team → P5 -->
+      <!-- Ops Team → P5: MCZ review + SFDC tracking task values (s_rtid, s_iid, gated, button type) -->
       <line x1="200" y1="570" x2="308" y2="585" stroke="#1473E6" stroke-width="1.5" marker-end="url(#dfd-ab)"/>
-      <text x="250" y="565" font-size="8" fill="#1473E6" font-weight="600">MCZ Review</text>
+      <text x="248" y="558" font-size="8" fill="#1473E6" font-weight="600">MCZ Review +</text>
+      <text x="248" y="568" font-size="8" fill="#1473E6" font-weight="600">SFDC task values</text>
 
       <!-- D4 → P5: taxonomy + shells -->
       <path d="M680,345 L650,345 L650,480 L430,480 L430,548" stroke="#12805C" stroke-width="1.2" fill="none" marker-end="url(#dfd-ag)" stroke-dasharray="5,3"/>
