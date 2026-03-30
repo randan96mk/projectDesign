@@ -264,6 +264,10 @@ Stores dynamically selectable program shell templates for MCZ provisioning, mapp
 
 ### 7. Workfront Fusion Scenarios – Detailed Flow
 
+> **Architectural Boundary — Intake Issue vs. Execution Projects:**
+> When a marketer submits a campaign request, Workfront creates a **Workfront Issue/Request** (the intake record). This Issue is the *starting point only* — its data is extracted by Fusion S1 and transferred by Fusion S2 into the **Marketer Project** task forms.
+> All Adobe I/O invocations, build operations, and validation logic operate exclusively on **Workfront Project and Task data** (marketer project and operations project). Adobe I/O is never invoked directly from the intake Issue/Request level.
+
 #### Scenario 1: Intake Request Processing (S1)
 
 **Trigger:** Watch Event – new request created
@@ -273,9 +277,8 @@ Stores dynamically selectable program shell templates for MCZ provisioning, mapp
 1. Event captured on request submit
 2. Request data extracted from intake form fields
 3. Routing determined: region, team, CTA type (Single/Multi), targeting option, content option
-4. Adobe I/O module called → **Overview Build Action** (builds initial overview from request data)
-5. Planning request table record created with all intake data
-6. Proceeds to Scenario 2 (Marketer Project Creation)
+4. Planning request table record created with all intake data
+5. Proceeds to Scenario 2 (Marketer Project Creation) — intake data is transferred into the marketer project task forms at this stage
 
 ---
 

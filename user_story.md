@@ -214,7 +214,7 @@
 
 **As a** campaign operations system,
 **I want** a Workfront Planning lookup table storing message templates containing dynamic placeholders (e.g., `{Name}`, `{CampaignID}`, `{SendDate}`, `{Region}`),
-**So that** automated notifications sent via Issues, Projects, and Tasks are personalized, consistent, and easy to maintain.
+**So that** automated notifications sent via Projects and Tasks are personalized, consistent, and easy to maintain.
 
 **Feature:** Validation Framework
 **Task Reference:** Task 8
@@ -228,6 +228,10 @@
 **As a** campaign operations system,
 **I want** a Fusion Function or Adobe I/O action to evaluate each campaign request against the Validation Rules lookup table and produce a structured validation summary,
 **So that** incomplete or non-compliant requests are flagged before any downstream project or provisioning activity begins.
+
+**Acceptance Notes:**
+- Validation runs on the **Marketer Project** task data, after Fusion S2 has transferred intake form values from the Workfront Issue into the marketer project task forms — never directly on the raw intake Issue/Request
+- Adobe I/O `validation-summary` is invoked by Fusion in response to a project or task event (e.g., task completion or field update on the marketer project), not from the intake request level
 
 **Feature:** Validation Framework
 **Task Reference:** Task 9
@@ -397,6 +401,12 @@
 **As a** platform engineer,
 **I want** reusable Adobe I/O JavaScript actions to handle business logic (overview generation, validation, MCZ payload building) that is too complex or stateful for native Fusion modules,
 **So that** orchestration logic is maintainable, version-controlled, and testable independently of Workfront Fusion scenarios.
+
+**Acceptance Notes:**
+- Adobe I/O actions are **exclusively invoked by Workfront Fusion** in response to events on **Workfront Projects and Tasks** (i.e., marketer project tasks and operations project tasks)
+- Adobe I/O is **never triggered directly from a Workfront Issue/Request** (the intake form submission); all intake data is first transferred by Fusion S2 into the marketer project before any Adobe I/O action runs
+- All build and validation operations (`overview-build`, `validation-summary`, `overview-summary-ops`) operate on marketer project task data; sync operations (`sync-object-build`, `snaplogic-response-processor`) operate on operations project task data
+- Adobe I/O actions receive input as JSON, execute stateless JavaScript logic, and return output as JSON back to Fusion
 
 **Feature:** Validation Framework / MCZ Integration & Provisioning
 **Task Reference:** Task 5, Task 9, Task 16
