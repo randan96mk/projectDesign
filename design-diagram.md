@@ -430,7 +430,7 @@
        v
   S1: Watch Event --> Filter (APAC/AMER, Email Batch)
        |
-       +---> Adobe I/O: overview-build --> initial overview written to request
+       +---> Adobe I/O: overview-build --> initial overview written to marketer project
        +---> Planning: Request Table record created
        |
        v
