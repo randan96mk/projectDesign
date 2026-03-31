@@ -596,7 +596,7 @@
     <div class="card">
       <div class="card-icon">&#128270;</div>
       <h3>overview-build</h3>
-      <p>Generates human-readable request overviews from intake data for marketer review.</p>
+      <p>Generates human-readable campaign overviews from marketer project task data for review. Invoked by Fusion after intake data is transferred into the marketer project — never directly from the intake Issue.</p>
       <span class="tag">Adobe I/O Action</span>
     </div>
     <div class="card">
@@ -1291,6 +1291,11 @@
      ═══════════════════════════════════════════════════════ -->
 <section id="scenarios" class="scenario-section">
   <h2>Workfront Fusion Scenarios</h2>
+  <p style="font-size:.9rem;color:#555;background:#f4f4f4;border-left:4px solid #7C3AED;padding:10px 14px;border-radius:4px;margin-bottom:18px;">
+    <strong>Architectural boundary:</strong> A marketer's form submission creates a <strong>Workfront Issue/Request</strong> (intake record only).
+    Fusion S1 validates and routes it; Fusion S2 transfers all intake data into the <strong>Marketer Project</strong> task forms.
+    From that point on, <strong>all Adobe I/O actions, build operations, and validation logic run exclusively on Workfront Projects and Tasks</strong> — never directly on the Workfront Issue/Request.
+  </p>
   <div style="overflow-x:auto;">
   <table class="scenario-table">
     <thead>
@@ -1305,14 +1310,14 @@
       <tr>
         <td class="scenario-id">S1</td>
         <td>Intake Request Processing</td>
-        <td>New request submitted</td>
-        <td>Validates request, triggers downstream creation</td>
+        <td>New request submitted (Workfront Issue created)</td>
+        <td>Validates &amp; routes request; intake data stays in the Issue at this stage</td>
       </tr>
       <tr>
         <td class="scenario-id">S2</td>
         <td>Marketer Project Creation</td>
-        <td>Request validated</td>
-        <td>Creates marketer project from template</td>
+        <td>Request validated by S1</td>
+        <td>Creates marketer project from template; transfers all intake Issue data into project task forms — this is the boundary after which all Adobe I/O, build, and validation operations run on project/task data</td>
       </tr>
       <tr>
         <td class="scenario-id">S3</td>
