@@ -238,39 +238,62 @@
 
 ---
 
-### US-018: Marketer Campaign Project Template Design
+### US-018: Unified Campaign Project Template Design (APAC / AMER)
 
-**Title:** Design a Workfront project template for marketer campaign execution
+**Title:** Design two unified Workfront project templates — one per region (APAC and AMER) — containing both Marketing and Operations phase tasks
 
 **As a** campaign project manager,
-**I want** a Workfront project template pre-configured with all standard phases, tasks, and associated forms for email campaign execution,
-**So that** every marketer campaign project is created consistently and the team doesn't need to manually build project structures for each campaign.
+**I want** a unified Workfront project template per region (APAC and AMER) that contains all standard Marketing phase tasks and Operations phase tasks in a single project structure,
+**So that** every campaign is managed in one unified project, ownership is split across phases (Marketing team owns Phase 1 milestones; Operations team owns Phase 2 milestones), and there is no need to maintain separate marketer and operations project templates.
+
+**Acceptance Notes:**
+- Two templates: APAC Unified Template and AMER Unified Template
+- **Phase 1 — Marketing milestones:** Email Governance task, Targeting Criteria task, Content task (content.js attached here), Language tasks, Overview Build task, Validation Summary task
+- **Phase 2 — Operations milestones:** Campaign Overview Summary task, SFDC Tracking task (conditional), Ops Email Summary task, MCZ-Pre-Sync Summary task, Build task, SnapLogic Submission task, QA task, Post-Launch task
+- Email Governance task completion is the trigger that activates Phase 2 tasks
+- For Multi CTA campaigns: Build task duration is extended by 1 additional day; the same template is reused with this duration adjustment
+- There is no separate Single CTA vs Multi CTA template split
 
 **Feature:** Campaign Project Automation
 **Task Reference:** Task 10
 
 ---
 
-### US-019: Operations Project Templates by Routing Logic
+### US-019: Unified Project Regional Variants — Multi CTA Build Duration Adjustment
 
-**Title:** Design multiple operations project templates based on region, team, and CTA type
+**Title:** Handle Multi CTA build duration variation within the unified project template
 
 **As a** campaign operations team lead,
-**I want** distinct Workfront project templates for each routing combination (APAC/AMER × Single CTA/Multi CTA),
-**So that** operations projects are automatically structured with the correct tasks and assignments matching the specific campaign configuration.
+**I want** the unified project template to automatically adjust the Build task duration by +1 day when the campaign is a Multi CTA type,
+**So that** operations teams have the correct time allocation for Multi CTA build work without requiring a separate template per CTA type.
+
+**Acceptance Notes:**
+- There are only 2 unified project templates (APAC and AMER) — no separate Single CTA / Multi CTA templates
+- When Fusion S2 detects Multi CTA type during project creation, it sets the Build task duration = standard duration + 1 day
+- All other tasks and phases remain identical between Single CTA and Multi CTA campaigns
+- Routing is region-based only (APAC → APAC template; AMER → AMER template)
 
 **Feature:** Campaign Project Automation
-**Task Reference:** Task 11
+**Task Reference:** Task 10
 
 ---
 
-### US-020: Fusion Scenario – Automated Marketer Project Creation
+### US-020: Fusion Scenario – Automated Unified Project Creation
 
-**Title:** Automatically create marketer campaign projects from validated intake requests via Workfront Fusion
+**Title:** Automatically create a unified campaign project from a validated intake request via Workfront Fusion
 
 **As a** campaign operations system,
-**I want** a Workfront Fusion scenario to automatically create a marketer project from the validated campaign request using the appropriate project template,
-**So that** the campaign execution lifecycle begins immediately upon request validation without requiring manual project setup.
+**I want** a Workfront Fusion scenario (S2) to automatically create a unified campaign project from the validated campaign request using the appropriate regional template (APAC or AMER),
+**So that** the complete campaign lifecycle — both Marketing and Operations phases — begins immediately upon request validation within a single, structured Workfront project.
+
+**Acceptance Notes:**
+- Template selection is region-based: APAC request → APAC Unified Template; AMER request → AMER Unified Template
+- All intake form data is transferred into the Marketing phase task forms within the unified project
+- If Multi CTA type: Build task duration in Operations phase is set to standard duration + 1 day
+- If SFDC tracking checkbox was checked: SFDC Tracking task is added to the Operations phase
+- If child/net-language request: content is routed to the appropriate language task in the existing unified project (no new project created)
+- Unified Project ID is recorded in the Planning request table
+- This scenario absorbs the previous S5 (Ops Project Creation) logic — there is no longer a separate operations project creation step
 
 **Feature:** Campaign Project Automation
 **Task Reference:** Task 12
@@ -290,16 +313,14 @@
 
 ---
 
-### US-022: Fusion Scenario – Automated Operations Project Creation
+### US-022: ~~Fusion Scenario – Automated Operations Project Creation~~ *(Retired — Merged into US-020)*
 
-**Title:** Automatically create operations projects based on routing logic via Workfront Fusion
+**Title:** ~~Automatically create operations projects based on routing logic via Workfront Fusion~~
 
-**As a** campaign operations system,
-**I want** a Workfront Fusion scenario to evaluate campaign routing conditions (region, team, CTA type) and automatically create the appropriate operations project using the matched template,
-**So that** operations teams receive fully structured projects without manual coordination from campaign managers.
+> **This story is retired.** The separate Operations Project Creation scenario (S5) has been merged into the Unified Project Creation scenario (S2 / US-020). Operations phase tasks are now scaffolded as part of the single unified project creation step. There is no longer a separate operations project or a dedicated operations project creation Fusion scenario.
 
 **Feature:** Campaign Project Automation
-**Task Reference:** Task 14
+**Task Reference:** ~~Task 14~~ *(removed)*
 
 ---
 
@@ -405,7 +426,7 @@
 **Acceptance Notes:**
 - Adobe I/O actions are **exclusively invoked by Workfront Fusion** in response to events on **Workfront Projects and Tasks** (i.e., marketer project tasks and operations project tasks)
 - Adobe I/O is **never triggered directly from a Workfront Issue/Request** (the intake form submission); all intake data is first transferred by Fusion S2 into the marketer project before any Adobe I/O action runs
-- All build and validation operations (`overview-build`, `validation-summary`, `overview-summary-ops`) operate on marketer project task data; sync operations (`sync-object-build`, `snaplogic-response-processor`) operate on operations project task data
+- All build and validation operations (`overview-build`, `validation-summary`, `overview-summary-ops`) operate on Marketing phase task data within the unified project; sync operations (`sync-object-build`, `snaplogic-response-processor`) operate on Operations phase task data within the unified project
 - Adobe I/O actions receive input as JSON, execute stateless JavaScript logic, and return output as JSON back to Fusion
 
 **Feature:** Validation Framework / MCZ Integration & Provisioning
@@ -515,7 +536,7 @@
 **So that** the operations team can supply the required Salesforce tracking IDs (s_rtid, s_iid), gated/ungated flag, and button type — which are then included in the sync object during MCZ provisioning.
 
 **Acceptance Notes:**
-- Checkbox on intake form triggers task creation in the operations project
+- Checkbox on intake form triggers task creation in the **Operations phase of the unified project** (handled by Fusion S2 during unified project creation)
 - SFDC Tracking task collects: Salesforce Campaign ID (rtid), Internal SFDC ID (s_iid), Gated/Ungated, Button Type
 - These values are consumed by the Adobe I/O sync object generation action before sending to SnapLogic
 - Task must be completed before the sync object build step can proceed
@@ -573,10 +594,10 @@
 **So that** the operations and marketing teams are immediately notified that MCZ provisioning is complete and the campaign is ready for quality assurance verification.
 
 **Acceptance Notes:**
-- Successful SnapLogic response → Workfront projects updated with MCZ program links (accessible URLs)
-- Specific tasks in both marketer and operations projects are marked complete
-- QA task in operations project is set to In Progress
-- Response data decoded by Adobe I/O action and written to both projects
+- Successful SnapLogic response → unified project updated with MCZ program links (accessible URLs)
+- Specific tasks in the unified project (Marketing and Operations phases) are marked complete
+- QA task in the Operations phase is set to In Progress
+- Response data decoded by Adobe I/O action and written to the unified project
 
 **Feature:** MCZ Integration & Provisioning / Campaign Project Automation
 **Task Reference:** Task 18
@@ -679,11 +700,11 @@
 | US-015 | Validation Framework | Validation Rules Lookup Table |
 | US-016 | Validation Framework | Interactive Message Templates with Placeholders |
 | US-017 | Validation Framework | Request Validation Summary Generation |
-| US-018 | Campaign Project Automation | Marketer Campaign Project Template Design |
-| US-019 | Campaign Project Automation | Operations Project Templates by Routing Logic |
-| US-020 | Campaign Project Automation | Fusion – Automated Marketer Project Creation |
+| US-018 | Campaign Project Automation | Unified Campaign Project Template Design (APAC / AMER) |
+| US-019 | Campaign Project Automation | Unified Project – Multi CTA Build Duration Adjustment |
+| US-020 | Campaign Project Automation | Fusion – Automated Unified Project Creation |
 | US-021 | Campaign Project Automation | Email Governance Task Completion Watch Event |
-| US-022 | Campaign Project Automation | Fusion – Automated Operations Project Creation |
+| US-022 | Campaign Project Automation | ~~Fusion – Automated Operations Project Creation~~ (Retired) |
 | US-023 | MCZ Integration & Provisioning | MCZ Taxonomy Lookup Table in Planning |
 | US-024 | MCZ Integration & Provisioning | MCZ Sync Object Payload Generation |
 | US-025 | MCZ Integration & Provisioning | Fusion – SnapLogic API Invocation |
