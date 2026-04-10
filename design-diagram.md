@@ -40,31 +40,25 @@
                                                              │
                                                              ▼
                                                    [Fusion Scenario 2]
-                                                   Marketer Project Creation
+                                                   Unified Project Creation
                                                              │
                                                              ▼
                                                    [Workfront Project]─────────────────────────►[Planning Table]
-                                                   Marketer Campaign                             Validation Rules
-                                                   Project (Template)                                 │
+                                                   Unified Campaign Project                      Validation Rules
+                                                   (APAC or AMER Template)                            │
                                                              │                                        │
                                                              ▼                                        ▼
-                                                   [Email Governance Task]              [Adobe I/O / Fusion Function]
+                                                   [Phase 1: Email Governance]          [Adobe I/O / Fusion Function]
                                                              │                          Validation Summary Logic
                                                              │                                        │
                                                    [Watch Event Trigger]◄───────────────────────────┘
-                                                   Task Completion Monitor
+                                                   S4: Email Governance Watch
                                                              │
                                                              ▼
-                                                   [Fusion Scenario 3]
-                                                   Operations Project Creation
-                                                   (Routing: Region/Team/CTA Type)
+                                                   [Phase 2 Activated]
+                                                   Operations Tasks within
+                                                   Unified Campaign Project
                                                              │
-                                                   ┌─────────┴──────────┐
-                                                   ▼                    ▼
-                                            [Ops Project:         [Ops Project:
-                                             APAC Team]            AMER Team]
-                                                   │                    │
-                                                   └─────────┬──────────┘
                                                              ▼
                                                    [MCZ Provisioning Flow]
 ```
@@ -332,52 +326,38 @@
 
 ```
   +-----------------------------------------------------------------------+
-  |              MARKETER CAMPAIGN PROJECT TEMPLATE                       |
-  |          (separate templates: Single CTA / Multi CTA)                 |
+  |          UNIFIED CAMPAIGN PROJECT TEMPLATE                            |
+  |          2 templates: APAC and AMER (region-based only)              |
+  |          Single CTA and Multi CTA use the SAME template               |
+  |          Multi CTA: Build task duration = standard + 1 day            |
   +-----------------------------------------------------------------------+
   |                                                                       |
-  |  Phase 1: Campaign Intake and Governance                              |
-  |  +--> Email Governance Task    [triggers Ops project creation on done]|
-  |  +--> Targeting Criteria Task  [form: region-specific targeting]      |
+  |  ── PHASE 1: MARKETING TEAM MILESTONES ─────────────────────────── │
   |                                                                       |
-  |  Phase 2: Campaign Content                                            |
+  |  +--> Email Governance Task    [completion triggers Phase 2 tasks]   |
+  |  +--> Targeting Criteria Task  [form: region-specific targeting]      |
   |  +--> Content Task             [form: CTA content fields]             |
   |  |     +--> content.js JSON document attached here (versioned)        |
   |  |     +--> overview summary and validation summary printed here      |
   |  +--> [Language Task 1]        [for net-language child requests]      |
   |  +--> [Language Task 2]        [additional language if submitted]     |
-  |                                                                       |
-  |  Phase 3: Overview and Validation                                     |
-  |  +--> Overview Build Task      [set In Progress by Fusion on change]  |
+  |  +--> Overview Build Task      [updated by Adobe I/O on each change]  |
   |  +--> Validation Summary Task  [updated by Adobe I/O on each change]  |
   |                                                                       |
-  |  Automated owners assigned per region; start dates set by Fusion      |
-  +-----------------------------------------------------------------------+
-
-  +-----------------------------------------------------------------------+
-  |              OPERATIONS PROJECT TEMPLATES                             |
-  |              (Routing: Region x CTA Type = 4 templates)              |
-  +-----------------------------------------------------------------------+
+  |  ── PHASE 2: OPERATIONS TEAM MILESTONES ────────────────────────── │
+  |  [Activated when Email Governance Task is marked complete]            |
   |                                                                       |
-  |  Template A: APAC - Single CTA                                        |
-  |  Template B: APAC - Multi CTA                                         |
-  |  Template C: AMER - Single CTA                                        |
-  |  Template D: AMER - Multi CTA                                         |
-  |                                                                       |
-  |  Each template contains:                                              |
-  |  Phase 1: Overview and Setup                                          |
   |  +--> Campaign Overview Summary task  [auto-written by Adobe I/O]     |
-  |  +--> [SFDC Tracking task]            [added by Fusion if flag set]   |
-  |                                                                       |
-  |  Phase 2: Pre-Sync MCZ Review                                         |
+  |  +--> [SFDC Tracking task]            [added by Fusion S2 if flag set]|
   |  +--> Ops Email Summary task          [completion triggers sync build]|
   |  +--> MCZ-Pre-Sync Summary task       [MCZ details written here]      |
-  |  +--> Build task                      [set In Progress on approval]   |
-  |                                                                       |
-  |  Phase 3: Provisioning and QA                                         |
+  |  +--> Build task                      [set In Progress on approval;   |
+  |  |                                     +1 day duration for Multi CTA] |
   |  +--> SnapLogic Submission task       [triggered on Build task done]  |
   |  +--> QA Task                         [set In Progress on MCZ success]|
-  |  +--> Post-Launch / Verification task [ops team verifies MCZ in Marketo]|
+  |  +--> Post-Launch / Verification task [ops team verifies MCZ]         |
+  |                                                                       |
+  |  Automated owners assigned per region; start dates set by Fusion      |
   +-----------------------------------------------------------------------+
 ```
 
@@ -396,27 +376,27 @@
   │                             │  Type = Email Program (Batch)                        │
   │                             │  Region = APAC or AMER                               │
   ├─────────────────────────────┼──────────────────────────────────────────────────────┤
-  │  S2: Marketer Project       │  S1 completes successfully                           │
+  │  S2: Unified Project        │  S1 completes successfully                           │
   │  Creation                   │  Request data validated                              │
+  │                             │  Template selected by region (APAC or AMER)          │
+  │                             │  Multi CTA: Build task duration set to +1 day        │
+  │                             │  If SFDC flag: SFDC Tracking task added to project   │
   ├─────────────────────────────┼──────────────────────────────────────────────────────┤
   │  S3: Task Change Watcher    │  Watch Event: Task value updated                     │
-  │  (Continuous)               │  Within a Marketer Campaign Project                  │
+  │  (Continuous)               │  Within a Unified Campaign Project                   │
   ├─────────────────────────────┼──────────────────────────────────────────────────────┤
   │  S4: Email Governance       │  Watch Event: Task Status = Complete                 │
   │  Task Watch                 │  Task Name = "Email Governance Task"                 │
-  │                             │  Project = Marketer Campaign Project                 │
+  │                             │  Project = Unified Campaign Project                  │
+  │                             │  Activates Phase 2 (Operations) tasks in project     │
   ├─────────────────────────────┼──────────────────────────────────────────────────────┤
-  │  S5: Ops Project            │  Triggered from S2 (in parallel)                     │
-  │  Creation                   │  Routing: Region + Team + CTA Type                   │
-  │                             │  SFDC flag checked -> adds SFDC Tracking task        │
-  ├─────────────────────────────┼──────────────────────────────────────────────────────┤
-  │  S6: Sync Object Build      │  Ops Email Summary task complete in Ops project      │
+  │  S6: Sync Object Build      │  Ops Email Summary task complete in unified project  │
   │  + SnapLogic API Call       │  MCZ review cycle -> Pre-Sync task complete          │
   │                             │  Build task complete -> sends Document ID to Snaplogic│
   ├─────────────────────────────┼──────────────────────────────────────────────────────┤
   │  S7: SnapLogic Response     │  Watch Event: Sync object document updated           │
   │  Watch + Processing         │  with new version (SnapLogic response payload)       │
-  │                             │  Decode -> update projects -> QA task In Progress    │
+  │                             │  Decode -> update unified project -> QA task In Progress│
   └─────────────────────────────┴──────────────────────────────────────────────────────┘
 ```
 
@@ -434,41 +414,38 @@
        +---> Planning: Request Table record created
        |
        v
-  S2: Marketer Project Creation
+  S2: Unified Project Creation
        |
-       +---> Select template (Single CTA / Multi CTA)
-       +---> Create project --> assign team/owner --> set start date
-       +---> Transfer intake form data --> marketer project task forms
+       +---> Select template by region (APAC or AMER)
+       +---> Create unified project --> assign team/owner --> set start date
+       +---> If Multi CTA: set Build task duration = standard + 1 day
+       +---> Transfer intake form data --> project task forms
        +---> If content provided: copy content fields to Content task
        +---> Adobe I/O: content.js generated --> stored as WF Document on Content task
        |         +--> Document ID saved to Planning Request Table
-       +---> Adobe I/O: validation-summary --> validation results on marketer project
+       +---> Adobe I/O: validation-summary --> validation results on unified project
+       +---> If SFDC flag: add SFDC Tracking task to Phase 2 of unified project
        |
-       |  [If child/net-language request: route to existing marketer project language task]
-       |
-       +--> (parallel) S5: Ops Project Creation
-                 +---> Select ops template (region x CTA type)
-                 +---> Create ops project --> assign ops team
-                 +--> If SFDC flag: add SFDC Tracking task to ops project
+       |  [If child/net-language request: route to existing unified project language task]
 
   ------------------------- CONTINUOUS LOOP -----------------------------------------
-  S3: Task Change Watcher (fires on any marketer task update)
-       +---> Adobe I/O: overview-build --> updated overview on marketer project
+  S3: Task Change Watcher (fires on any task update in unified project)
+       +---> Adobe I/O: overview-build --> updated overview on unified project
        +---> Adobe I/O: validation-summary --> re-evaluated; updated on project
        +--> content.js: new version saved on Content task document
   -----------------------------------------------------------------------------------
 
        |
        v
-  S4: Email Governance Task Completed (marketer project)
+  S4: Email Governance Task Completed (unified project — Phase 1 → Phase 2 trigger)
        |
-       +---> Adobe I/O: overview-summary-ops --> ops-level overview on Ops project
-       +---> Ops pre-sync pending tasks --> marked complete
-       +--> Ops Pre-Sync Summary task --> set In Progress
+       +---> Adobe I/O: overview-summary-ops --> ops-level overview written to unified project
+       +---> Phase 2 pre-sync pending tasks --> marked complete
+       +--> MCZ-Pre-Sync Summary task --> set In Progress
 
        |
        v
-  S6: Pre-Sync Summary task In Progress (ops project)
+  S6: Pre-Sync Summary task In Progress (unified project — Phase 2)
        |
        +---> Adobe I/O: sync-object-build
        |         +--> input: content.js + tokens + program shells + SFDC IDs
@@ -500,9 +477,9 @@
        |         +--> output: MCZ program URL + status + task flags + QA flag
        |
        +---> Workfront updates:
-       |     +--> MCZ links written to both Marketer and Ops projects
-       |     +--> Relevant tasks in both projects --> marked Complete
-       |     +--> QA task in Ops project --> set In Progress
+       |     +--> MCZ links written to unified project
+       |     +--> Relevant tasks in unified project --> marked Complete
+       |     +--> QA task in unified project --> set In Progress
        +--> Planning Request Table --> updated with MCZ program details and final status
 ```
 
@@ -511,13 +488,13 @@
 ## content.js Document Lifecycle
 
 ```
-  [S2: Marketer Project Created]
+  [S2: Unified Project Created]
        |
        v
   Adobe I/O: overview-build creates initial content.js
        |
        v
-  content.js v1 --> stored as WF Document attachment on Content task
+  content.js v1 --> stored as WF Document attachment on Content task (Phase 1)
        |               Document ID saved in Planning Request Table
        |
        | [Any marketer task update - S3 fires]
@@ -547,31 +524,38 @@
 
 ---
 
-## Operations Project – Task Structure and Key Milestones
+## Operations Phase – Task Structure and Key Milestones
+
+> **Note:** Operations tasks are now Phase 2 of the Unified Campaign Project (see Project Template
+> Structure above). There is no longer a separate Operations Project. Phase 2 is activated when
+> the Email Governance Task (Phase 1) is marked complete. Fusion S5 (Ops Project Creation) has
+> been eliminated; all project creation is handled by S2 (Unified Project Creation).
 
 ```
   +------------------------------------------------------------------+
-  |              OPERATIONS PROJECT - KEY TASK FLOW                  |
-  |              (Single CTA and Multi CTA templates)                |
+  |         UNIFIED PROJECT — PHASE 2: OPERATIONS TASK FLOW         |
+  |         (Activated by Email Governance Task completion)          |
   +------------------------------------------------------------------+
   |                                                                  |
-  |  [Created by Fusion S5 after marketer project creation]          |
+  |  [Triggered by S4 when Email Governance Task marked complete]    |
   |                                                                  |
-  |  Phase 1: Overview and Setup                                     |
+  |  Overview and Setup                                              |
   |  +--> Campaign Overview Summary task   [auto-completed by S4]    |
-  |  +--> [SFDC Tracking task]             [if SFDC flag set]        |
-  |                                                                  |
-  |  Phase 2: Pre-Sync MCZ Review                                    |
+  |  +--> [SFDC Tracking task]             [if SFDC flag set; added  |
+  |                                         to project by S2]        |
   |  +--> Ops Email Summary task           [completion triggers S6]  |
+  |                                                                  |
+  |  Pre-Sync MCZ Review                                             |
   |  +--> MCZ-Pre-Sync Summary task        [review / approve]        |
   |  |     +--> MCZ details written here by Adobe I/O               |
   |  |     +--> Ops team reviews / requests corrections             |
-  |  +--> Build task                       [set In Progress on       |
-  |                                         Pre-Sync approval]       |
+  |  +--> Build task (+1 day for Multi CTA) [set In Progress on      |
+  |                                           Pre-Sync approval]     |
   |                                                                  |
-  |  Phase 3: Provisioning and QA                                    |
+  |  Provisioning and QA                                             |
   |  +--> SnapLogic submission             [Build task completion]   |
   |  +--> QA Task                          [set In Progress on       |
   |                                         MCZ success response]   |
+  |  +--> Post-Launch / Verification task                            |
   +------------------------------------------------------------------+
 ```
