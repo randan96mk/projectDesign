@@ -228,10 +228,10 @@
     // ── FUSION PROCESSES ─────────────────────────────────────
     const procs = [
       { key:'p1', c:RED,    txt:'P1  Intake Processing\nS1 · Validate & Route'          },
-      { key:'p2', c:BLUE,   txt:'P2  Project Scaffolding\nS2 · Marketer Project Create'  },
+      { key:'p2', c:BLUE,   txt:'P2  Project Scaffolding\nS2 · Unified Project Create'   },
       { key:'p3', c:BLUE,   txt:'P3  Content Management\nS3 · Watch & Update content.js' },
       { key:'p4', c:GREEN,  txt:'P4  Governance Check\nS4 · Email Approval Gate'         },
-      { key:'p5', c:BLUE,   txt:'P5  Ops & Sync Build\nS5+S6 · Prepare MCZ Payload'     },
+      { key:'p5', c:BLUE,   txt:'P5  Sync Build\nS6 · Prepare MCZ Payload'              },
       { key:'p6', c:ORANGE, txt:'P6  API Dispatch\nS6 · SnapLogic Gateway'               },
       { key:'p7', c:PURPLE, txt:'P7  Response Processing\nS7 · Update & Activate QA'    },
     ];
