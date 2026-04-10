@@ -147,12 +147,14 @@ These values are resolved per-CTA URL during MCZ sync object generation.
 
 Automated integration layer responsible for:
 
-- **Intake Processing Scenario:** Watches for new requests in the queue (APAC/AMER, Email Program type); triggers downstream orchestration
-- **Marketer Project Creation Scenario:** Automatically creates a structured Workfront project for the marketer based on validated request data
-- **Email Governance Watch Event:** Monitors completion of the Email Governance task within marketer projects
-- **Operations Project Creation Scenario:** Creates operations team projects based on routing logic (region, team, CTA type)
-- **SnapLogic API Invocation Scenario:** Transmits MCZ payloads to SnapLogic for downstream Marketo provisioning
-- **SnapLogic Response Watch Event:** Detects and processes responses from SnapLogic to update provisioning status
+- **Intake Processing Scenario (S1):** Watches for new requests in the queue (APAC/AMER, Email Program type); triggers downstream orchestration
+- **Unified Project Creation Scenario (S2):** Automatically creates a single unified Workfront project (APAC or AMER template) containing both Marketing and Operations phase tasks
+- **Task Change Watcher (S3):** Monitors task value changes within the unified project; triggers overview rebuild and validation re-run via Adobe I/O
+- **Email Governance Watch Event (S4):** Monitors completion of the Email Governance task; activates the Operations phase tasks within the same unified project
+- **SnapLogic API Invocation Scenario (S6):** Transmits MCZ payloads to SnapLogic for downstream Marketo provisioning
+- **SnapLogic Response Watch Event (S7):** Detects and processes responses from SnapLogic to update provisioning status
+
+> **Note:** The platform runs **6 Fusion scenarios** (S1–S4, S6–S7). The former S5 Operations Project Creation scenario has been merged into S2 — the unified project creation now handles all project scaffolding for both Marketing and Operations phases in a single step.
 
 ---
 
@@ -184,8 +186,7 @@ Stores structured intake request data and serves as the central record for campa
 | Team Code | Linked to Team lookup table via PL connection |
 | Content Document ID | Workfront Document ID of the `content.js` JSON file attached to the Content task |
 | Sync Object Document ID | Workfront Document ID of the MCZ sync object JSON file |
-| Marketer Project ID | Linked Workfront marketer project |
-| Operations Project ID | Linked Workfront operations project |
+| Unified Project ID | Linked Workfront unified campaign project (contains both Marketing and Operations phase tasks) |
 | Status | Current campaign lifecycle status |
 | SFDC Tracking Required | Boolean flag from intake form checkbox |
 
@@ -264,9 +265,9 @@ Stores dynamically selectable program shell templates for MCZ provisioning, mapp
 
 ### 7. Workfront Fusion Scenarios – Detailed Flow
 
-> **Architectural Boundary — Intake Issue vs. Execution Projects:**
-> When a marketer submits a campaign request, Workfront creates a **Workfront Issue/Request** (the intake record). This Issue is the *starting point only* — its data is extracted by Fusion S1 and transferred by Fusion S2 into the **Marketer Project** task forms.
-> All Adobe I/O invocations, build operations, and validation logic operate exclusively on **Workfront Project and Task data** (marketer project and operations project). Adobe I/O is never invoked directly from the intake Issue/Request level.
+> **Architectural Boundary — Intake Issue vs. Unified Project:**
+> When a marketer submits a campaign request, Workfront creates a **Workfront Issue/Request** (the intake record). This Issue is the *starting point only* — its data is extracted by Fusion S1 and transferred by Fusion S2 into the **Unified Campaign Project** task forms.
+> The unified project contains **both Marketing phase tasks and Operations phase tasks** in a single Workfront project. All Adobe I/O invocations, build operations, and validation logic operate exclusively on these project tasks. Adobe I/O is never invoked directly from the intake Issue/Request level.
 
 #### Scenario 1: Intake Request Processing (S1)
 
@@ -282,21 +283,25 @@ Stores dynamically selectable program shell templates for MCZ provisioning, mapp
 
 ---
 
-#### Scenario 2: Marketer Project Creation (S2)
+#### Scenario 2: Unified Project Creation (S2)
 
 **Trigger:** Completion of S1 with validated request data
 
 **Flow:**
-1. Correct marketer project template selected based on CTA type (Single CTA / Multi CTA) and region
-2. Marketer project created in Workfront using selected template
+1. Correct unified project template selected based on **region (APAC or AMER)**
+2. Unified project created in Workfront using the selected regional template
 3. Project assigned to correct team and owner(s) based on region
 4. Project start date set
-5. All intake form data transferred to respective marketer project task forms
-6. If content was provided ("Add content now"): content fields copied to the Content task within the marketer project
+5. All intake form data transferred to respective Marketing phase task forms within the unified project
+6. If content was provided ("Add content now"): content fields copied to the Content task within the unified project
 7. Adobe I/O module called → **content.js Generation Action** — builds initial JSON document; stored as Workfront Document attachment on the Content task
-8. Planning request table updated: Marketer Project ID and Content Document ID recorded
-9. Adobe I/O module called → **Validation Summary Action** — initial validation run; results printed on marketer project
-10. If parent marketer project selected (child/net-language request): content routed to the corresponding language task within the existing project (no new project created)
+8. Planning request table updated: Unified Project ID and Content Document ID recorded
+9. Adobe I/O module called → **Validation Summary Action** — initial validation run; results printed on unified project
+10. If Multi CTA type: Build task duration in the Operations phase is extended by **1 additional day**
+11. If SFDC tracking was requested: **SFDC Tracking task** added to the Operations phase of the unified project
+12. If parent project selected (child/net-language request): content routed to the corresponding language task within the existing unified project (no new project created)
+
+> **Note:** Operations phase task scaffolding (previously handled by the separate S5 scenario) is now part of this unified project creation step. There is no longer a separate Ops Project Creation scenario.
 
 ---
 
@@ -314,26 +319,13 @@ Stores dynamically selectable program shell templates for MCZ provisioning, mapp
 
 #### Scenario 4: Email Governance Task Completion Watch (S4)
 
-**Trigger:** Watch Event – Task Name = "Email Governance Task", Status = Complete, within a Marketer Campaign Project
+**Trigger:** Watch Event – Task Name = "Email Governance Task", Status = Complete, within a Unified Campaign Project
 
 **Flow:**
-1. Governance task completion detected
-2. Adobe I/O module called → **Overview Summary Generation Action** — final overview summary built and written to the Operations project
-3. Operations project tasks that are pending overview data are marked complete
-4. Pre-Sync Summary task in Operations project is set to **In Progress**
-
----
-
-#### Scenario 5: Operations Project Creation (S5)
-
-**Trigger:** Initiated from S2 after marketer project creation; operations project is created in parallel
-
-**Flow:**
-1. Routing logic evaluates: Region + Team + CTA Type (Single/Multi)
-2. Correct operations project template selected
-3. Operations project created and assigned to operations team
-4. If SFDC tracking was requested: **SFDC Tracking task** added to the operations project
-5. Planning request table updated: Operations Project ID recorded
+1. Governance task completion detected — this marks the transition from Marketing phase to Operations phase within the unified project
+2. Adobe I/O module called → **Overview Summary Generation Action** — final overview summary built and written to the Operations phase of the unified project
+3. Operations phase tasks that are pending overview data are marked complete
+4. Pre-Sync Summary task in the Operations phase is set to **In Progress**
 
 ---
 
@@ -342,15 +334,15 @@ Stores dynamically selectable program shell templates for MCZ provisioning, mapp
 **Trigger:** Completion of the Pre-Sync Summary task in the Operations project (after MCZ details review cycle)
 
 **Sub-flow – MCZ Review Cycle (within S6):**
-1. Ops Email Summary task completion detected in Operations project
+1. Ops Email Summary task completion detected in the Operations phase of the unified project
 2. Adobe I/O module called → **Sync Object Build Action** — constructs MCZ sync object JSON from `content.js` + lookup enrichment + tokens + program shells + SFDC tracking IDs (if applicable)
 3. Sync object JSON stored as Workfront Document; Document ID saved to Planning request table
-4. MCZ details written to the **MCZ-Pre-Sync Summary task** in Operations project for review
+4. MCZ details written to the **MCZ-Pre-Sync Summary task** in the Operations phase for review
 5. Operations team reviews MCZ details:
    - **If changes needed:** team updates field values → Fusion detects update → Adobe I/O Sync Object Build Action re-triggered → updated MCZ details posted back to task → review cycle repeats
    - **If approved:** MCZ-Pre-Sync Summary task marked complete
 6. On task complete: Adobe I/O Overview Summary Action re-run → final overview regenerated
-7. **Build task** in Operations project set to **In Progress**
+7. **Build task** in the Operations phase set to **In Progress**
 8. On Build task complete: sync object Document ID sent to SnapLogic API
 
 **SnapLogic API Call:**
@@ -369,9 +361,9 @@ Stores dynamically selectable program shell templates for MCZ provisioning, mapp
 2. Adobe I/O module called → **SnapLogic Response Processor Action** — decodes the response JSON
 3. Response decoded: MCZ program URL, success/failure status, provisioning details extracted
 4. Workfront update:
-   - MCZ links and program details written to Operations and Marketer projects
-   - Relevant tasks in both projects marked complete
-   - **QA task** in Operations project set to **In Progress**
+   - MCZ links and program details written to the unified project
+   - Relevant tasks in the unified project marked complete
+   - **QA task** in the Operations phase set to **In Progress**
 5. Planning request table updated with MCZ program details and final status
 6. Operations team verifies MCZ details in Marketo and proceeds with QA
 
@@ -386,8 +378,8 @@ Each Adobe I/O action operates as an **independent, stateless JavaScript functio
 **Purpose:** Generate a formatted request overview summary from the current campaign data
 **Input:** `content.js` JSON object (campaign fields, CTA data, targeting, metadata)
 **Output:** Formatted HTML/text overview string
-**Trigger:** Any marketer project task value change; initial request processing
-**Usage:** Written to marketer project description or task note
+**Trigger:** Any Marketing phase task value change within the unified project; initial project creation
+**Usage:** Written to the unified project description or task note (Marketing phase)
 
 ---
 
@@ -396,18 +388,18 @@ Each Adobe I/O action operates as an **independent, stateless JavaScript functio
 **Purpose:** Evaluate all campaign fields against the validation rules table and produce a structured validation report
 **Input:** `content.js` JSON + validation rules payload
 **Output:** Validation summary JSON (rule-by-rule results, severity, overall pass/fail)
-**Trigger:** Any marketer project task value change
-**Usage:** Printed on marketer project; blocks downstream steps if critical failures exist
+**Trigger:** Any Marketing phase task value change within the unified project
+**Usage:** Printed on the unified project; blocks downstream steps if critical failures exist
 
 ---
 
 #### Action 3: Overview Summary Generation (`overview-summary-ops`)
 
-**Purpose:** Generate the final campaign overview summary for the Operations project after Email Governance task completion
+**Purpose:** Generate the final campaign overview summary for the Operations phase after Email Governance task completion
 **Input:** `content.js` JSON (final state)
 **Output:** Formatted operations-level overview summary string
-**Trigger:** Email Governance task completion in marketer project
-**Usage:** Written to Operations project; makes ops pre-sync tasks visible
+**Trigger:** Email Governance task completion within the unified project
+**Usage:** Written to the Operations phase of the unified project; makes ops pre-sync tasks visible
 
 ---
 
@@ -418,7 +410,7 @@ Each Adobe I/O action operates as an **independent, stateless JavaScript functio
 **Output:**
 - MCZ Sync Object JSON (stored as Workfront Document)
 - Human-readable MCZ details string (written to MCZ-Pre-Sync Summary task)
-**Trigger:** Pre-sync step in Operations project (after ops email summary completion and on any MCZ detail correction)
+**Trigger:** Pre-sync step in the Operations phase of the unified project (after ops email summary completion and on any MCZ detail correction)
 **Usage:** Sync object document ID tracked in Planning request table; MCZ details rendered for ops team review
 
 ---
@@ -430,10 +422,10 @@ Each Adobe I/O action operates as an **independent, stateless JavaScript functio
 **Output:** Structured JSON with:
 - MCZ program URL and access links
 - Provisioning status (success / failure / partial)
-- Task completion flags for marketer and operations projects
+- Task completion flags for Marketing and Operations phase tasks within the unified project
 - QA readiness flag
 **Trigger:** Sync object document version update detected by Fusion watch event
-**Usage:** Fusion applies output to update both projects, complete tasks, and set QA task to In Progress
+**Usage:** Fusion applies output to update the unified project, complete tasks, and set QA task to In Progress
 
 ---
 
@@ -442,7 +434,7 @@ Each Adobe I/O action operates as an **independent, stateless JavaScript functio
 The `content.js` file is the central data artifact for each campaign. It is:
 
 - **Format:** JSON
-- **Storage:** Workfront Document attachment on the Content task within the marketer project (versioned)
+- **Storage:** Workfront Document attachment on the Content task within the unified campaign project (versioned)
 - **Purpose:** Consolidates all campaign data that Workfront Planning column fields alone cannot hold
 - **Created by:** Adobe I/O `overview-build` action during initial Fusion S2 processing
 - **Updated by:** Adobe I/O actions on every relevant marketer task change event
@@ -493,11 +485,9 @@ Epic: Campaign Orchestration Platform Build
 │   └── Task 9: Request Validation Summary Logic
 │
 ├── Feature: Campaign Project Automation
-│   ├── Task 10: Marketer Campaign Project Template
-│   ├── Task 11: Operations Project Templates (Routing Logic)
-│   ├── Task 12: Fusion Scenario – Marketer Project Creation
-│   ├── Task 13: Watch Event – Email Governance Task Completion
-│   └── Task 14: Fusion Scenario – Operations Project Creation
+│   ├── Task 10: Unified Campaign Project Template (APAC / AMER)
+│   ├── Task 12: Fusion Scenario – Unified Project Creation
+│   └── Task 13: Watch Event – Email Governance Task Completion
 │
 └── Feature: MCZ Integration & Provisioning
     ├── Task 15: Planning Table – MCZ Taxonomy Lookup
@@ -541,16 +531,17 @@ Epic: Campaign Orchestration Platform Build
 
 - [ ] All intake forms (APAC, AMER) dynamically render fields per conditional logic
 - [ ] CTA content sections render correctly for Single CTA and Multi CTA (up to CTA 5)
-- [ ] SFDC tracking checkbox correctly triggers ops project task via Fusion
+- [ ] SFDC tracking checkbox correctly triggers SFDC Tracking task in Operations phase of unified project via Fusion
 - [ ] Existing fields reused without duplication; taxonomy documented and approved
-- [ ] All 7 Fusion scenarios tested end-to-end
+- [ ] All 6 Fusion scenarios (S1–S4, S6–S7) tested end-to-end
 - [ ] All 5 Adobe I/O actions tested with JSON input/output validation
-- [ ] content.js correctly created and versioned as Workfront Document on Content task
-- [ ] Planning request table populated with parent/child linking and PL enrichment verified
+- [ ] content.js correctly created and versioned as Workfront Document on Content task within unified project
+- [ ] Planning request table populated with parent/child linking, Unified Project ID, and PL enrichment verified
 - [ ] All lookup tables (Solutions, Industry, POI, Team, Validation Rules, Messages, MCZ Taxonomy, Tokens, Program Shell) migrated from Airtable to Workfront Planning and validated (APAC/AMER scope; EMEA remains on Airtable)
 - [ ] PL connections verified: enrichment flows automatically on field value changes
+- [ ] Unified project templates (APAC and AMER) verified: Marketing phase tasks and Operations phase tasks correctly structured; Multi CTA Build task duration +1 day confirmed
 - [ ] MCZ pre-sync review cycle tested (build → review → correction → resubmit → approve)
 - [ ] MCZ payloads successfully processed via SnapLogic; MCZ programs provisioned in Marketo
-- [ ] SnapLogic response processed; QA task set In Progress; MCZ links written to projects
+- [ ] SnapLogic response processed; QA task set In Progress; MCZ links written to unified project
 - [ ] Stakeholder acceptance obtained for each feature
 - [ ] All components deployed to production

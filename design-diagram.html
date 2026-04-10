@@ -569,8 +569,8 @@
     </div>
     <div class="card">
       <div class="card-icon">&#128736;</div>
-      <h3>Project Templates</h3>
-      <p>Marketer &amp; Operations project templates with phased tasks, region-specific routing, and CTA-type-based scaffolding.</p>
+      <h3>Unified Project Templates</h3>
+      <p>Two region-based templates (APAC and AMER) combining Phase 1 (Marketing) and Phase 2 (Operations) milestones in a single project. Multi CTA uses the same template with Build task duration extended by 1 day.</p>
       <span class="tag">Templating</span>
     </div>
   </div>
@@ -596,7 +596,7 @@
     <div class="card">
       <div class="card-icon">&#128270;</div>
       <h3>overview-build</h3>
-      <p>Generates human-readable campaign overviews from marketer project task data for review. Invoked by Fusion after intake data is transferred into the marketer project — never directly from the intake Issue.</p>
+      <p>Generates human-readable campaign overviews from unified project task data for review. Invoked by Fusion after intake data is transferred into the unified project — never directly from the intake Issue.</p>
       <span class="tag">Adobe I/O Action</span>
     </div>
     <div class="card">
@@ -806,8 +806,8 @@
       <text x="450" y="190" text-anchor="middle" font-size="10" fill="#888">Versioned JSON Document</text>
 
       <rect x="620" y="148" width="200" height="62" rx="8" fill="#fff" stroke="#1473E6" stroke-width="1.5" filter="url(#ds)"/>
-      <text x="720" y="173" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Project Templates</text>
-      <text x="720" y="190" text-anchor="middle" font-size="10" fill="#888">Marketer &amp; Ops</text>
+      <text x="720" y="173" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Unified Project Templates</text>
+      <text x="720" y="190" text-anchor="middle" font-size="10" fill="#888">APAC / AMER</text>
 
       <!-- Business Logic nodes -->
       <rect x="40" y="272" width="160" height="56" rx="8" fill="#fff" stroke="#7C3AED" stroke-width="1.5" filter="url(#ds)"/>
@@ -987,12 +987,12 @@
       <text x="320" y="59" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Intake Processing</text>
       <text x="320" y="76" text-anchor="middle" font-size="9" fill="#888">S1: Validate &amp; Route</text>
 
-      <!-- P2: Project Scaffolding (S2) — transfers intake→Marketer Project, then invokes Adobe I/O -->
+      <!-- P2: Project Scaffolding (S2) — transfers intake→Unified Project, then invokes Adobe I/O -->
       <rect x="190" y="152" width="228" height="76" rx="38" fill="#fff" stroke="#1473E6" stroke-width="2" filter="url(#dfd-ds)"/>
       <circle cx="215" cy="190" r="15" fill="#1473E6"/>
       <text x="215" y="195" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">P2</text>
       <text x="320" y="183" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Project Scaffolding</text>
-      <text x="320" y="200" text-anchor="middle" font-size="9" fill="#888">S2: Marketer Project Create</text>
+      <text x="320" y="200" text-anchor="middle" font-size="9" fill="#888">S2: Unified Project Create</text>
 
       <!-- P3: Content Management (S3) — watches Marketer Project task changes -->
       <rect x="190" y="278" width="228" height="76" rx="38" fill="#fff" stroke="#7C3AED" stroke-width="2" filter="url(#dfd-ds)"/>
@@ -1008,12 +1008,12 @@
       <text x="320" y="435" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Governance Check</text>
       <text x="320" y="452" text-anchor="middle" font-size="9" fill="#888">S4: Email Approval Gate</text>
 
-      <!-- P5: Ops &amp; Sync Build (S5+S6) -->
+      <!-- P5: Sync Build (S6) — S5 eliminated; ops tasks now in unified project -->
       <rect x="190" y="530" width="228" height="76" rx="38" fill="#fff" stroke="#1473E6" stroke-width="2" filter="url(#dfd-ds)"/>
       <circle cx="215" cy="568" r="15" fill="#1473E6"/>
       <text x="215" y="573" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">P5</text>
-      <text x="320" y="561" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Ops &amp; Sync Build</text>
-      <text x="320" y="578" text-anchor="middle" font-size="9" fill="#888">S5+S6: Build MCZ Payload</text>
+      <text x="320" y="561" text-anchor="middle" font-size="12" font-weight="700" fill="#2C2C2C">Sync Build</text>
+      <text x="320" y="578" text-anchor="middle" font-size="9" fill="#888">S6: Build MCZ Payload</text>
 
       <!-- P6: API Dispatch (SnapLogic) -->
       <rect x="868" y="530" width="188" height="76" rx="38" fill="#fff" stroke="#E68619" stroke-width="2" filter="url(#dfd-ds)"/>
@@ -1047,7 +1047,7 @@
       <!-- validation-summary (invoked by P2 and P3 on Marketer Project task data) -->
       <rect x="450" y="224" width="174" height="40" rx="5" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5" filter="url(#dfd-ds)"/>
       <text x="537" y="241" text-anchor="middle" font-size="10" font-weight="700" fill="#5B21B6">validation-summary</text>
-      <text x="537" y="256" text-anchor="middle" font-size="7.5" fill="#6D28D9">Validates Marketer Project data</text>
+      <text x="537" y="256" text-anchor="middle" font-size="7.5" fill="#6D28D9">Validates Unified Project data</text>
 
       <!-- overview-summary-ops (invoked by P4/S4 on governance approval) -->
       <rect x="450" y="422" width="174" height="40" rx="5" fill="#EDE9FE" stroke="#7C3AED" stroke-width="1.5" filter="url(#dfd-ds)"/>
@@ -1284,7 +1284,7 @@
       <div class="flow-node fi-blue">
         <div class="flow-icon">&#128194;</div>
         <h4>S2 — Project</h4>
-        <p>Marketer</p>
+        <p>Unified</p>
       </div>
     </div>
     <div class="flow-chevron">&#10132;</div>
@@ -1311,16 +1311,7 @@
       <div class="flow-node fi-green">
         <div class="flow-icon">&#9989;</div>
         <h4>S4 — Govern</h4>
-        <p>Email Approval</p>
-      </div>
-    </div>
-    <div class="flow-chevron">&#10132;</div>
-
-    <div class="flow-step">
-      <div class="flow-node fi-blue">
-        <div class="flow-icon">&#128736;</div>
-        <h4>S5 — Ops</h4>
-        <p>Project Create</p>
+        <p>Phase 2 Activate</p>
       </div>
     </div>
     <div class="flow-chevron">&#10132;</div>
@@ -1356,7 +1347,7 @@
       <div class="flow-node fi-blue">
         <div class="flow-icon">&#128228;</div>
         <h4>S7 — Response</h4>
-        <p>Update Projects</p>
+        <p>Update Project</p>
       </div>
     </div>
 
@@ -1370,7 +1361,7 @@
   <h2>Workfront Fusion Scenarios</h2>
   <p style="font-size:.9rem;color:#555;background:#f4f4f4;border-left:4px solid #7C3AED;padding:10px 14px;border-radius:4px;margin-bottom:18px;">
     <strong>Architectural boundary:</strong> A marketer's form submission creates a <strong>Workfront Issue/Request</strong> (intake record only).
-    Fusion S1 validates and routes it; Fusion S2 transfers all intake data into the <strong>Marketer Project</strong> task forms.
+    Fusion S1 validates and routes it; Fusion S2 creates the <strong>Unified Campaign Project</strong> (APAC or AMER template) and transfers all intake data into project task forms.
     From that point on, <strong>all Adobe I/O actions, build operations, and validation logic run exclusively on Workfront Projects and Tasks</strong> — never directly on the Workfront Issue/Request.
   </p>
   <div style="overflow-x:auto;">
@@ -1392,27 +1383,21 @@
       </tr>
       <tr>
         <td class="scenario-id">S2</td>
-        <td>Marketer Project Creation</td>
+        <td>Unified Project Creation</td>
         <td>Request validated by S1</td>
-        <td>Creates marketer project from template; transfers all intake Issue data into project task forms — this is the boundary after which all Adobe I/O, build, and validation operations run on project/task data</td>
+        <td>Creates unified campaign project using region-based template (APAC or AMER); transfers all intake data into project task forms; sets Multi CTA Build task duration +1 day if applicable; adds SFDC Tracking task if SFDC flag set — boundary after which all Adobe I/O, build, and validation operations run on project/task data</td>
       </tr>
       <tr>
         <td class="scenario-id">S3</td>
         <td>Task Change Watcher</td>
-        <td>Marketer task updated</td>
-        <td>Updates content.js with latest data</td>
+        <td>Unified project task updated</td>
+        <td>Updates content.js with latest data; re-runs overview-build and validation-summary</td>
       </tr>
       <tr>
         <td class="scenario-id">S4</td>
         <td>Email Governance Watch</td>
-        <td>Governance task complete</td>
-        <td>Triggers sync object generation</td>
-      </tr>
-      <tr>
-        <td class="scenario-id">S5</td>
-        <td>Ops Project Creation</td>
-        <td>Governance approved</td>
-        <td>Creates ops project with region/CTA routing</td>
+        <td>Email Governance Task marked complete (Phase 1)</td>
+        <td>Activates Phase 2 (Operations) tasks within the unified project; writes ops-level overview via Adobe I/O overview-summary-ops</td>
       </tr>
       <tr>
         <td class="scenario-id">S6</td>
@@ -1424,7 +1409,7 @@
         <td class="scenario-id">S7</td>
         <td>Response Processing</td>
         <td>SnapLogic response received</td>
-        <td>Updates projects with MCZ links, activates QA</td>
+        <td>Updates unified project with MCZ links, activates QA task</td>
       </tr>
     </tbody>
   </table>
