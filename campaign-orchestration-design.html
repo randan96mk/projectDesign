@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campaign Orchestration Platform – Architecture & Design</title>
+  <style>
+    :root {
+      --adobe-red: #FA0F00;
+      --adobe-dark: #1B1B1B;
+      --adobe-gray: #2C2C2C;
+      --adobe-mid: #3D3D3D;
+      --adobe-border: #444;
+      --adobe-text: #E8E8E8;
+      --adobe-muted: #A0A0A0;
+      --accent-blue: #1473E6;
+      --accent-teal: #00B0A0;
+      --accent-purple: #7B61FF;
+      --accent-orange: #E68619;
+      --accent-green: #2D9D78;
+      --accent-pink: #D7373F;
+      --wf-blue: #0E6EB8;
+      --fusion-orange: #F58220;
+      --io-magenta: #B34FBA;
+      --planning-teal: #00A88E;
+      --marketo-purple: #5C4EE5;
+      --snaplogic-green: #4CAF50;
+      --section-bg: #222;
+      --card-bg: #2A2A2A;
+      --card-border: #3A3A3A;
+      --header-h: 64px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Adobe Clean', 'Inter', 'Segoe UI', sans-serif;
+      background: var(--adobe-dark);
+      color: var(--adobe-text);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0F0F0F;
+      border-bottom: 2px solid var(--adobe-red);
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 16px;
+    }
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: var(--adobe-red);
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: #fff;
+      letter-spacing: -1px;
+      flex-shrink: 0;
+    }
+    header h1 {
+      font-size: 17px; font-weight: 700;
+      color: #fff;
+      border-left: 1px solid #444;
+      padding-left: 16px;
+      margin-left: 4px;
+    }
+    header .subtitle {
+      font-size: 12px; color: var(--adobe-muted);
+      margin-top: 2px;
+    }
+    .header-badge {
+      margin-left: auto;
+      background: #1A1A1A;
+      border: 1px solid var(--adobe-border);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 11px;
+      color: var(--adobe-muted);
+    }
+    .header-badge span { color: var(--accent-green); }
+
+    /* ── NAV PILLS ── */
+    nav {
+      background: #181818;
+      border-bottom: 1px solid var(--adobe-border);
+      padding: 0 32px;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+    }
+    nav a {
+      display: inline-block;
+      padding: 10px 18px;
+      font-size: 13px;
+      color: var(--adobe-muted);
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    nav a:hover { color: #fff; }
+    nav a.active { color: var(--adobe-red); border-bottom-color: var(--adobe-red); }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 32px 80px;
+    }
+
+    /* ── SECTION ── */
+    section { margin-bottom: 64px; }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--adobe-border);
+    }
+    .section-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .section-header h2 {
+      font-size: 22px; font-weight: 700; color: #fff;
+    }
+    .section-header .section-desc {
+      font-size: 13px; color: var(--adobe-muted);
+      margin-top: 2px;
+    }
+
+    /* ── HERO STATS ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+    .stat-card .num {
+      font-size: 32px; font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--adobe-red), #FF6B6B);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-card .label {
+      font-size: 11px; color: var(--adobe-muted);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── TOOL CARDS ── */
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .tool-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .tool-card:hover { border-color: var(--card-accent); transform: translateY(-2px); }
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--card-accent);
+    }
+    .tool-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .tool-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+    .tool-card h3 {
+      font-size: 16px; font-weight: 700; color: #fff;
+    }
+    .tool-card .tool-type {
+      font-size: 11px;
+      color: var(--card-accent);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .tool-card p {
+      font-size: 13px; color: var(--adobe-muted);
+      margin-bottom: 14px;
+    }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 11px;
+      color: #ccc;
+    }
+
+    /* ── ARCHITECTURE DIAGRAM ── */
+    .arch-diagram {
+      background: #181818;
+      border: 1px solid var(--adobe-border);
+      border-radius: 16px;
+      padding: 32px;
+      overflow-x: auto;
+    }
+
+    .swimlane-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-width: 900px;
+    }
+
+    .swimlane {
+      display: flex;
+      align-items: stretch;
+      border-bottom: 1px solid #2A2A2A;
+    }
+    .swimlane:last-child { border-bottom: none; }
+
+    .lane-label {
+      width: 130px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      padding: 16px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-right: 2px solid #2A2A2A;
+      writing-mode: horizontal-tb;
+    }
+
+    .lane-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 20px;
+      flex-wrap: wrap;
+    }
+
+    .lane-node {
+      background: var(--node-bg, #2A2A2A);
+      border: 1px solid var(--node-border, #444);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--node-text, #fff);
+      white-space: nowrap;
+      position: relative;
+    }
+    .lane-node.dim { opacity: 0.5; }
+
+    .arrow {
+      color: var(--adobe-muted);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .connector-line {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--adobe-muted);
+    }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow-diagram {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .flow-step {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-left: 2px solid #333;
+      padding-left: 24px;
+      margin-left: 16px;
+      position: relative;
+    }
+    .flow-step::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 24px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--step-color, var(--adobe-red));
+      border: 2px solid var(--adobe-dark);
+    }
+    .flow-step:last-child { border-left-color: transparent; }
+
+    .step-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      background: var(--step-color, var(--adobe-red));
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .step-body h4 {
+      font-size: 14px; font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .step-body p {
+      font-size: 13px;
+      color: var(--adobe-muted);
+    }
+    .step-tags { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 5px; }
+
+    /* ── SCENARIO TABLE ── */
+    .scenario-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    .scenario-table th {
+      background: #1E1E1E;
+      padding: 10px 14px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--adobe-muted);
+      border-bottom: 1px solid var(--adobe-border);
+    }
+    .scenario-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #2A2A2A;
+      vertical-align: top;
+    }
+    .scenario-table tr:last-child td { border-bottom: none; }
+    .scenario-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .scenario-table .scenario-id {
+      font-weight: 700;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--fusion-orange);
+    }
+    .trigger-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .trigger-watch { background: rgba(0,176,160,0.15); color: var(--accent-teal); border: 1px solid rgba(0,176,160,0.3); }
+    .trigger-webhook { background: rgba(245,130,32,0.15); color: var(--fusion-orange); border: 1px solid rgba(245,130,32,0.3); }
+
+    /* ── PLANNING TABLES ── */
+    .planning-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .planning-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+      border-left: 3px solid var(--planning-teal);
+    }
+    .planning-card.core { border-left-color: var(--adobe-red); }
+    .planning-card.lookup { border-left-color: #555; }
+    .planning-card h4 {
+      font-size: 13px; font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .planning-card p {
+      font-size: 12px;
+      color: var(--adobe-muted);
+    }
+    .pl-badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      background: rgba(0,168,142,0.15);
+      color: var(--planning-teal);
+      border: 1px solid rgba(0,168,142,0.3);
+    }
+    .core-badge {
+      background: rgba(250,15,0,0.15);
+      color: #FF6B6B;
+      border: 1px solid rgba(250,15,0,0.3);
+    }
+
+    /* ── IO ACTIONS ── */
+    .io-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .io-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 20px;
+      border-top: 3px solid var(--io-magenta);
+    }
+    .io-card .fn-name {
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--io-magenta);
+      margin-bottom: 8px;
+    }
+    .io-card p { font-size: 12px; color: var(--adobe-muted); margin-bottom: 10px; }
+    .endpoint-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+    .env-pill {
+      padding: 2px 7px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .env-stage { background: rgba(230,134,25,0.15); color: var(--accent-orange); border: 1px solid rgba(230,134,25,0.3); }
+    .env-prod { background: rgba(45,157,120,0.15); color: var(--accent-green); border: 1px solid rgba(45,157,120,0.3); }
+    .endpoint-url {
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: var(--adobe-muted);
+      word-break: break-all;
+    }
+
+    /* ── CONNECTION MAP ── */
+    .conn-map {
+      background: #181818;
+      border: 1px solid var(--adobe-border);
+      border-radius: 16px;
+      padding: 32px;
+    }
+    .conn-center {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+    .center-node {
+      background: linear-gradient(135deg, #1A0000, #3A0000);
+      border: 2px solid var(--adobe-red);
+      border-radius: 16px;
+      padding: 24px 40px;
+      text-align: center;
+    }
+    .center-node .node-label { font-size: 18px; font-weight: 900; color: #fff; }
+    .center-node .node-sub { font-size: 12px; color: var(--adobe-muted); margin-top: 4px; }
+
+    .spokes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 768px) { .spokes { grid-template-columns: repeat(2, 1fr); } }
+
+    .spoke-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 18px;
+      position: relative;
+    }
+    .spoke-card::after {
+      content: var(--conn-label, '');
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 4px;
+      padding: 2px 8px;
+      font-size: 10px;
+      color: var(--adobe-muted);
+      white-space: nowrap;
+    }
+    .spoke-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .spoke-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--dot-color, #888);
+      flex-shrink: 0;
+    }
+    .spoke-title { font-size: 14px; font-weight: 700; color: #fff; }
+    .spoke-items { list-style: none; }
+    .spoke-items li {
+      font-size: 12px;
+      color: var(--adobe-muted);
+      padding: 3px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .spoke-items li::before { content: '›'; color: #555; flex-shrink: 0; }
+
+    /* ── VALIDATION TABLE ── */
+    .validation-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+    }
+    .val-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .val-card h4 { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .val-card .regex {
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      color: var(--accent-teal);
+      background: rgba(0,176,160,0.08);
+      border: 1px solid rgba(0,176,160,0.2);
+      border-radius: 4px;
+      padding: 6px 10px;
+      margin: 8px 0;
+      word-break: break-all;
+    }
+    .val-card p { font-size: 12px; color: var(--adobe-muted); }
+
+    /* ── NOTIFICATIONS ── */
+    .notif-list { display: flex; flex-direction: column; gap: 10px; }
+    .notif-item {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .notif-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: rgba(20,115,230,0.15);
+      border: 1px solid rgba(20,115,230,0.3);
+      color: var(--accent-blue);
+      font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .notif-body h4 { font-size: 13px; font-weight: 700; color: #fff; }
+    .notif-body p { font-size: 12px; color: var(--adobe-muted); margin-top: 2px; }
+    .notif-trigger {
+      margin-left: auto;
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: rgba(245,130,32,0.12);
+      color: var(--fusion-orange);
+      border: 1px solid rgba(245,130,32,0.25);
+      white-space: nowrap;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0F0F0F;
+      border-top: 1px solid var(--adobe-border);
+      padding: 24px 32px;
+      text-align: center;
+      font-size: 12px;
+      color: #555;
+    }
+    footer span { color: var(--adobe-red); }
+
+    /* ── UTILITIES ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+    .table-wrap { border-radius: 10px; overflow: hidden; border: 1px solid var(--adobe-border); }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .badge-red { background: rgba(250,15,0,0.15); color: #FF6B6B; border: 1px solid rgba(250,15,0,0.3); }
+    .badge-teal { background: rgba(0,176,160,0.15); color: var(--accent-teal); border: 1px solid rgba(0,176,160,0.3); }
+    .badge-blue { background: rgba(20,115,230,0.15); color: var(--accent-blue); border: 1px solid rgba(20,115,230,0.3); }
+    .badge-purple { background: rgba(123,97,255,0.15); color: var(--accent-purple); border: 1px solid rgba(123,97,255,0.3); }
+    .highlight { color: var(--adobe-red); font-weight: 700; }
+    .info-box {
+      background: rgba(20,115,230,0.08);
+      border: 1px solid rgba(20,115,230,0.25);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: #b0caed;
+      margin-bottom: 20px;
+    }
+    .info-box strong { color: #fff; }
+    .sub-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin: 24px 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sub-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #2A2A2A;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ──────────────────────────────────────────── HEADER ── -->
+<header>
+  <div class="logo-mark">Ai</div>
+  <div>
+    <h1>Campaign Orchestration Platform</h1>
+    <div class="subtitle">Architecture &amp; Design Reference · APAC &amp; AMER</div>
+  </div>
+  <div class="header-badge">Status: <span>Active Development</span></div>
+</header>
+
+<!-- ──────────────────────────────────────────── NAV ── -->
+<nav>
+  <a href="#overview" class="active">Overview</a>
+  <a href="#tools">Tools &amp; Systems</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#intake-flow">Intake Flow</a>
+  <a href="#fusion">Fusion Scenarios</a>
+  <a href="#io-actions">Adobe I/O</a>
+  <a href="#planning">Planning Tables</a>
+  <a href="#validation">Validation</a>
+  <a href="#notifications">Notifications</a>
+</nav>
+
+<main>
+
+  <!-- ──────────────────────────── SECTION: OVERVIEW ── -->
+  <section id="overview">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(250,15,0,0.15);">🏛️</div>
+      <div>
+        <h2>Platform Overview</h2>
+        <div class="section-desc">End-to-end email campaign automation from intake to Marketo provisioning</div>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="num">2</div><div class="label">Regions (APAC &amp; AMER)</div></div>
+      <div class="stat-card"><div class="num">4</div><div class="label">Project Templates</div></div>
+      <div class="stat-card"><div class="num">19</div><div class="label">Fusion Scenarios</div></div>
+      <div class="stat-card"><div class="num">5</div><div class="label">Adobe I/O Actions</div></div>
+      <div class="stat-card"><div class="num">10+</div><div class="label">Planning Tables</div></div>
+      <div class="stat-card"><div class="num">77</div><div class="label">Marketo Tokens</div></div>
+      <div class="stat-card"><div class="num">7</div><div class="label">Validation Rules</div></div>
+      <div class="stat-card"><div class="num">7</div><div class="label">Email Notifications</div></div>
+    </div>
+
+    <div class="info-box">
+      <strong>Mission:</strong> Replace fragmented, region-specific manual marketing operations workflows with a unified, governed, and automated orchestration engine — from structured intake to automated MCZ (Marketo) token provisioning — across APAC and AMER.
+    </div>
+
+    <div class="info-box" style="background:rgba(0,168,142,0.08); border-color:rgba(0,168,142,0.25); color:#a0d8cf;">
+      <strong>Shared Design Note:</strong> APAC and AMER intake forms share the <em>same solution design and form structure</em>. The only region-specific difference is a small subset of Targeting Criteria fields. All other fields (including Send Date, content sections, CTA fields) are identical across both regions.
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── SECTION: TOOLS ── -->
+  <section id="tools">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(14,110,184,0.2);">🔧</div>
+      <div>
+        <h2>Tools &amp; Systems</h2>
+        <div class="section-desc">Six interconnected platforms forming the orchestration backbone</div>
+      </div>
+    </div>
+
+    <div class="tools-grid">
+
+      <!-- Workfront -->
+      <div class="tool-card" style="--card-accent: var(--wf-blue);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="color: var(--wf-blue);">📋</div>
+          <div>
+            <div class="tool-type">Project Management</div>
+            <h3>Adobe Workfront</h3>
+          </div>
+        </div>
+        <p>Central intake, project scaffolding, task management, and governance hub. Hosts intake forms, request queues, project templates, custom forms, and all campaign lifecycle tasks.</p>
+        <div class="tag-list">
+          <span class="tag">Request Queue</span>
+          <span class="tag">4 Project Templates</span>
+          <span class="tag">6 Custom Forms</span>
+          <span class="tag">250+ Custom Fields</span>
+          <span class="tag">Teams: APAC / AMER</span>
+          <span class="tag">Email Governance</span>
+          <span class="tag">Dashboards</span>
+        </div>
+      </div>
+
+      <!-- Fusion -->
+      <div class="tool-card" style="--card-accent: var(--fusion-orange);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="color: var(--fusion-orange);">⚡</div>
+          <div>
+            <div class="tool-type">Integration Automation</div>
+            <h3>Workfront Fusion</h3>
+          </div>
+        </div>
+        <p>Automated integration layer. Watches Workfront events and webhook triggers to orchestrate project creation, data routing, task updates, and Adobe I/O calls.</p>
+        <div class="tag-list">
+          <span class="tag">4 Watch Event Scenarios</span>
+          <span class="tag">15 Webhook Scenarios</span>
+          <span class="tag">19 Total Scenarios</span>
+          <span class="tag">Preview / Prod Envs</span>
+          <span class="tag">Webhook URLs</span>
+          <span class="tag">Template Task IDs</span>
+        </div>
+      </div>
+
+      <!-- Planning -->
+      <div class="tool-card" style="--card-accent: var(--planning-teal);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="color: var(--planning-teal);">🗄️</div>
+          <div>
+            <div class="tool-type">Data Repository</div>
+            <h3>Workfront Planning</h3>
+          </div>
+        </div>
+        <p>Structured relational data layer. Stores campaign metadata, lookup tables, tokens, program shells, and all enrichment data consumed by Fusion and Adobe I/O.</p>
+        <div class="tag-list">
+          <span class="tag">10+ Tables</span>
+          <span class="tag">PL Connections</span>
+          <span class="tag">Campaign Request Data</span>
+          <span class="tag">77 Tokens Table</span>
+          <span class="tag">11 Lookup Tables</span>
+          <span class="tag">Program Shell</span>
+        </div>
+      </div>
+
+      <!-- Adobe I/O -->
+      <div class="tool-card" style="--card-accent: var(--io-magenta);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="color: var(--io-magenta);">☁️</div>
+          <div>
+            <div class="tool-type">Serverless Runtime</div>
+            <h3>Adobe I/O Runtime</h3>
+          </div>
+        </div>
+        <p>Stateless serverless JavaScript actions under the <code>fusion-dev</code> package. Handles validation, summary generation, sync object building, and SnapLogic response processing.</p>
+        <div class="tag-list">
+          <span class="tag">5 Actions</span>
+          <span class="tag">fusion-dev package</span>
+          <span class="tag">Stage Namespace</span>
+          <span class="tag">Prod Namespace</span>
+          <span class="tag">require-adobe-auth</span>
+        </div>
+      </div>
+
+      <!-- SnapLogic -->
+      <div class="tool-card" style="--card-accent: var(--snaplogic-green);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="color: var(--snaplogic-green);">🔗</div>
+          <div>
+            <div class="tool-type">External Middleware</div>
+            <h3>SnapLogic</h3>
+          </div>
+        </div>
+        <p>External middleware that receives the MCZ Sync Object JSON (by Document ID), calls the Marketo API for token creation, and returns the response as a new document version on the Content task.</p>
+        <div class="tag-list">
+          <span class="tag">MCZ Sync Object Receiver</span>
+          <span class="tag">Marketo API Bridge</span>
+          <span class="tag">Document Version Return</span>
+          <span class="tag">JSON Payload</span>
+        </div>
+      </div>
+
+      <!-- Marketo -->
+      <div class="tool-card" style="--card-accent: var(--marketo-purple);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="color: var(--marketo-purple);">✉️</div>
+          <div>
+            <div class="tool-type">Marketing Automation</div>
+            <h3>Adobe Marketo (MCZ)</h3>
+          </div>
+        </div>
+        <p>Target provisioning platform. Receives token data via SnapLogic and creates campaign program shells with all 77 tokens organized by CTA section. Triggered when Pre-Build task reaches 100%.</p>
+        <div class="tag-list">
+          <span class="tag">77 Tokens</span>
+          <span class="tag">CTA Sections 1–5</span>
+          <span class="tag">Program Shell</span>
+          <span class="tag">POI-based Prefix</span>
+          <span class="tag">Folder Creation</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── SECTION: ARCHITECTURE ── -->
+  <section id="architecture">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(123,97,255,0.15);">🗺️</div>
+      <div>
+        <h2>System Architecture</h2>
+        <div class="section-desc">High-level data and control flow across all systems</div>
+      </div>
+    </div>
+
+    <!-- Connection Hub -->
+    <div class="conn-map">
+      <div class="conn-center">
+        <div class="center-node">
+          <div class="node-label">🔀 Workfront Fusion</div>
+          <div class="node-sub">Orchestration Engine · 19 Scenarios</div>
+        </div>
+      </div>
+
+      <div class="spokes">
+
+        <div class="spoke-card" style="--dot-color: var(--wf-blue); --conn-label: 'Watch Events + API';">
+          <div class="spoke-header">
+            <div class="spoke-dot"></div>
+            <div class="spoke-title">📋 Workfront</div>
+          </div>
+          <ul class="spoke-items">
+            <li>Watch request submission events</li>
+            <li>Read/write custom fields (250+)</li>
+            <li>Create projects from templates</li>
+            <li>Add tasks (SFDC Tracking etc.)</li>
+            <li>Update task completion %</li>
+            <li>Attach documents (content.js)</li>
+            <li>Trigger email notifications</li>
+          </ul>
+        </div>
+
+        <div class="spoke-card" style="--dot-color: var(--planning-teal); --conn-label: 'REST API';">
+          <div class="spoke-header">
+            <div class="spoke-dot"></div>
+            <div class="spoke-title">🗄️ Workfront Planning</div>
+          </div>
+          <ul class="spoke-items">
+            <li>Enrich intake data via PL links</li>
+            <li>Read lookup tables (11 tables)</li>
+            <li>Fetch token definitions (77)</li>
+            <li>Read Program Shell mapping</li>
+            <li>Resolve POI token prefix</li>
+            <li>Store Campaign Request Data</li>
+          </ul>
+        </div>
+
+        <div class="spoke-card" style="--dot-color: var(--io-magenta); --conn-label: 'HTTPS + Auth Token';">
+          <div class="spoke-header">
+            <div class="spoke-dot"></div>
+            <div class="spoke-title">☁️ Adobe I/O Runtime</div>
+          </div>
+          <ul class="spoke-items">
+            <li>Call validationSummary action</li>
+            <li>Call overAllSummary action</li>
+            <li>Call overviewSummary action</li>
+            <li>Call mczSyncObject action</li>
+            <li>Call processResponse action</li>
+            <li>Pass content.js document ID</li>
+          </ul>
+        </div>
+
+        <div class="spoke-card" style="--dot-color: var(--snaplogic-green); --conn-label: 'REST Webhook';">
+          <div class="spoke-header">
+            <div class="spoke-dot"></div>
+            <div class="spoke-title">🔗 SnapLogic</div>
+          </div>
+          <ul class="spoke-items">
+            <li>Send MCZ Sync Object JSON</li>
+            <li>Provide WF Document ID</li>
+            <li>Receive provisioning response</li>
+            <li>Store response as doc version</li>
+          </ul>
+        </div>
+
+        <div class="spoke-card" style="--dot-color: var(--marketo-purple); --conn-label: 'Via SnapLogic';">
+          <div class="spoke-header">
+            <div class="spoke-dot"></div>
+            <div class="spoke-title">✉️ Marketo (MCZ)</div>
+          </div>
+          <ul class="spoke-items">
+            <li>Create Program Shell folder</li>
+            <li>Provision 77 tokens</li>
+            <li>Map tokens to CTA sections</li>
+            <li>POI-prefixed token naming</li>
+            <li>Return provision status</li>
+          </ul>
+        </div>
+
+        <div class="spoke-card" style="--dot-color: #888; --conn-label: 'Webhook Triggers';">
+          <div class="spoke-header">
+            <div class="spoke-dot"></div>
+            <div class="spoke-title">👤 Marketer / Ops User</div>
+          </div>
+          <ul class="spoke-items">
+            <li>Submit intake form (APAC/AMER)</li>
+            <li>Trigger webhook scenarios</li>
+            <li>Complete campaign tasks</li>
+            <li>Provide targeting / content</li>
+            <li>Approve pre-build review</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Swimlane Architecture -->
+    <div class="sub-title" style="margin-top:36px;">Swimlane — End-to-End Data Flow</div>
+    <div class="arch-diagram">
+      <div class="swimlane-container">
+
+        <div class="swimlane">
+          <div class="lane-label" style="color: #888;">Marketer</div>
+          <div class="lane-content">
+            <div class="lane-node" style="--node-bg:#1A1A1A; --node-border:#444;">Submit Intake Form</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:#1A1A1A; --node-border:#444;">APAC or AMER<br/>Queue Topic</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:#1A1A1A; --node-border:#444;">Content / Targeting<br/>Selections</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:#1A1A1A; --node-border:#444;">Submit Request</div>
+          </div>
+        </div>
+
+        <div class="swimlane">
+          <div class="lane-label" style="color: var(--wf-blue);">Workfront</div>
+          <div class="lane-content">
+            <div class="lane-node" style="--node-bg:rgba(14,110,184,0.1); --node-border:rgba(14,110,184,0.4);">Request Created</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(14,110,184,0.1); --node-border:rgba(14,110,184,0.4);">Watch Event S1<br/>Fires</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(14,110,184,0.1); --node-border:rgba(14,110,184,0.4);">Marketer Project<br/>Created (Template)</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(14,110,184,0.1); --node-border:rgba(14,110,184,0.4);">Ops Project<br/>Created (Template)</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(14,110,184,0.1); --node-border:rgba(14,110,184,0.4);">content.js<br/>Attached</div>
+          </div>
+        </div>
+
+        <div class="swimlane">
+          <div class="lane-label" style="color: var(--fusion-orange);">Fusion</div>
+          <div class="lane-content">
+            <div class="lane-node" style="--node-bg:rgba(245,130,32,0.1); --node-border:rgba(245,130,32,0.4);">S1–S4: Watch<br/>Events</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(245,130,32,0.1); --node-border:rgba(245,130,32,0.4);">S5–S19: Webhook<br/>Scenarios</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(245,130,32,0.1); --node-border:rgba(245,130,32,0.4);">Data Aggregation<br/>&amp; Routing</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(245,130,32,0.1); --node-border:rgba(245,130,32,0.4);">Adobe I/O<br/>API Calls</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(245,130,32,0.1); --node-border:rgba(245,130,32,0.4);">SnapLogic<br/>Trigger</div>
+          </div>
+        </div>
+
+        <div class="swimlane">
+          <div class="lane-label" style="color: var(--planning-teal);">Planning</div>
+          <div class="lane-content">
+            <div class="lane-node" style="--node-bg:rgba(0,168,142,0.1); --node-border:rgba(0,168,142,0.4);">Campaign Request<br/>Data Table</div>
+            <div class="arrow">↔</div>
+            <div class="lane-node" style="--node-bg:rgba(0,168,142,0.1); --node-border:rgba(0,168,142,0.4);">PL Enrichment<br/>(11 Lookups)</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(0,168,142,0.1); --node-border:rgba(0,168,142,0.4);">Tokens Table<br/>(77 Tokens)</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(0,168,142,0.1); --node-border:rgba(0,168,142,0.4);">Program Shell<br/>Mapping</div>
+          </div>
+        </div>
+
+        <div class="swimlane">
+          <div class="lane-label" style="color: var(--io-magenta);">Adobe I/O</div>
+          <div class="lane-content">
+            <div class="lane-node" style="--node-bg:rgba(179,79,186,0.1); --node-border:rgba(179,79,186,0.4);">validationSummary</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(179,79,186,0.1); --node-border:rgba(179,79,186,0.4);">overAllSummary</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(179,79,186,0.1); --node-border:rgba(179,79,186,0.4);">overviewSummary</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(179,79,186,0.1); --node-border:rgba(179,79,186,0.4);">mczSyncObject</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(179,79,186,0.1); --node-border:rgba(179,79,186,0.4);">processResponse</div>
+          </div>
+        </div>
+
+        <div class="swimlane">
+          <div class="lane-label" style="color: var(--snaplogic-green);">SnapLogic</div>
+          <div class="lane-content">
+            <div class="lane-node" style="--node-bg:rgba(76,175,80,0.1); --node-border:rgba(76,175,80,0.4);">Receive Sync<br/>Object JSON</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(76,175,80,0.1); --node-border:rgba(76,175,80,0.4);">Call Marketo<br/>API</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(76,175,80,0.1); --node-border:rgba(76,175,80,0.4);">Return Response<br/>as Doc Version</div>
+          </div>
+        </div>
+
+        <div class="swimlane">
+          <div class="lane-label" style="color: var(--marketo-purple);">Marketo</div>
+          <div class="lane-content">
+            <div class="lane-node" style="--node-bg:rgba(92,78,229,0.1); --node-border:rgba(92,78,229,0.4);">Create Program<br/>Shell Folder</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(92,78,229,0.1); --node-border:rgba(92,78,229,0.4);">Provision<br/>77 Tokens</div>
+            <div class="arrow">→</div>
+            <div class="lane-node" style="--node-bg:rgba(92,78,229,0.1); --node-border:rgba(92,78,229,0.4);">Campaign<br/>Ready ✓</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── SECTION: INTAKE FLOW ── -->
+  <section id="intake-flow">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(0,176,160,0.15);">📝</div>
+      <div>
+        <h2>Intake Form Flow</h2>
+        <div class="section-desc">Step-by-step marketer journey through the campaign request form</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="sub-title">Form Steps</div>
+        <div class="flow-diagram">
+          <div class="flow-step" style="--step-color: var(--wf-blue);">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h4>Request Queue</h4>
+              <p>EAC Enterprise Marketing &amp; Operations Request Queue (existing)</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--wf-blue);">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h4>Queue Topic</h4>
+              <p>APAC or AMER Enterprise Campaign Operations Requests</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--wf-blue);">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h4>Subject</h4>
+              <p>Free text — existing field</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--wf-blue);">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h4>Region</h4>
+              <p>APAC / AMER (existing field + options)</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--wf-blue);">
+            <div class="step-num">5</div>
+            <div class="step-body">
+              <h4>Sub-Region</h4>
+              <p>Filtered by Region selection (existing field)</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--wf-blue);">
+            <div class="step-num">6</div>
+            <div class="step-body">
+              <h4>Country</h4>
+              <p>Filtered by Sub-Region selection (existing field)</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--wf-blue);">
+            <div class="step-num">7</div>
+            <div class="step-body">
+              <h4>Enterprise GTM Segments</h4>
+              <p>Shown only when Region = AMER (existing field)</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--wf-blue);">
+            <div class="step-num">8</div>
+            <div class="step-body">
+              <h4>Requesting Team</h4>
+              <p>Dropdown — existing field</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--wf-blue);">
+            <div class="step-num">9</div>
+            <div class="step-body">
+              <h4>Request Type</h4>
+              <p>Email Program (Batch) — existing field</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--accent-teal);">
+            <div class="step-num">10</div>
+            <div class="step-body">
+              <h4>Send Date ⭐</h4>
+              <p>Campaign send date selector — existing, validated across APAC/AMER/EMEA; positioned above Targeting Criteria</p>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--accent-orange);">
+            <div class="step-num">11</div>
+            <div class="step-body">
+              <h4>Targeting Criteria</h4>
+              <p>Radio button — 4 options with conditional logic (region-specific field subset)</p>
+              <div class="step-tags">
+                <span class="tag">Copy from Last</span>
+                <span class="tag">Copy from Specific</span>
+                <span class="tag">Add Now</span>
+                <span class="tag">Provide Later</span>
+              </div>
+            </div>
+          </div>
+          <div class="flow-step" style="--step-color: var(--io-magenta);">
+            <div class="step-num">12</div>
+            <div class="step-body">
+              <h4>Campaign Content</h4>
+              <p>Radio button — 4 options (conditional CTA fields rendered dynamically)</p>
+              <div class="step-tags">
+                <span class="tag">Provide Later</span>
+                <span class="tag">Copy from Last</span>
+                <span class="tag">Copy from Specific</span>
+                <span class="tag">Add Now (CTA 1–5)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sub-title">CTA Content Structure</div>
+        <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:10px; padding:20px; margin-bottom:20px;">
+          <div style="font-size:12px; font-weight:700; color:var(--io-magenta); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">Base Fields (CTA 1 — Always Shown)</div>
+          <ul class="spoke-items" style="margin-left:0;">
+            <li>Subject Line</li>
+            <li>Preview Text</li>
+            <li>Email Call-to-Action Text</li>
+            <li>Email Call-to-Action URL</li>
+            <li>Email Headline</li>
+            <li>Email Banner Image (URL)</li>
+            <li>Email Body (Rich Text)</li>
+            <li>Content Image (URL)</li>
+          </ul>
+        </div>
+        <div style="background:var(--card-bg); border:1px solid var(--card-border); border-radius:10px; padding:20px; margin-bottom:20px;">
+          <div style="font-size:12px; font-weight:700; color:var(--accent-orange); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">CTA 2–5 (Multi-CTA Only — 5 fields each)</div>
+          <ul class="spoke-items" style="margin-left:0;">
+            <li>CTA N Email Headline</li>
+            <li>CTA N Email Body (Rich Text)</li>
+            <li>CTA N Email CTA Text</li>
+            <li>CTA N Email CTA URL</li>
+            <li>CTA N Content Image (URL)</li>
+          </ul>
+          <div style="margin-top:12px; font-size:12px; color:var(--adobe-muted);">Maximum: <strong style="color:#fff;">5 CTAs</strong> total (CTA Type: Single or Multi · Number: 2, 3, 4, 5)</div>
+        </div>
+        <div style="background:rgba(250,15,0,0.06); border:1px solid rgba(250,15,0,0.2); border-radius:10px; padding:20px;">
+          <div style="font-size:12px; font-weight:700; color:var(--adobe-red); margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">SFDC Tracking Checkbox</div>
+          <p style="font-size:13px; color:#ccc; font-style:italic; margin-bottom:10px;">"Do you require Salesforce Campaign ID Creation as part of this request?"</p>
+          <ul class="spoke-items" style="margin-left:0;">
+            <li>When checked → Fusion adds SFDC Tracking task to Ops project</li>
+            <li>APAC only: 2 additional APJ-specific Salesforce build tasks</li>
+            <li>Ops team fills: s_rtid, s_iid, Gated/Ungated, Button Type</li>
+            <li>Used during MCZ Sync Object generation</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── SECTION: FUSION SCENARIOS ── -->
+  <section id="fusion">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(245,130,32,0.15);">⚡</div>
+      <div>
+        <h2>Workfront Fusion Scenarios</h2>
+        <div class="section-desc">19 automated scenarios — 4 Watch Events + 15 Webhook Scenarios</div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>Migration Note:</strong> When moving from Preview/Stage to Production, each scenario requires: connection updates, template task ID updates, webhook URL updates, and re-activation.
+    </div>
+
+    <div class="sub-title">Watch Event Scenarios (S1–S4)</div>
+    <div class="table-wrap" style="margin-bottom:28px;">
+      <table class="scenario-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Scenario Name</th>
+            <th>Trigger</th>
+            <th>Region</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="scenario-id">S1</span></td>
+            <td>New Request – APAC Intake</td>
+            <td><span class="trigger-badge trigger-watch">Watch Event</span></td>
+            <td><span class="badge badge-teal">APAC</span></td>
+            <td>Watches for new APAC queue topic submissions; creates Marketer project from APAC template; routes child requests to existing project</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S2</span></td>
+            <td>New Request – AMER Intake</td>
+            <td><span class="trigger-badge trigger-watch">Watch Event</span></td>
+            <td><span class="badge badge-blue">AMER</span></td>
+            <td>Watches for new AMER queue topic submissions; creates Marketer project from AMER template; routes child requests to existing project</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S3</span></td>
+            <td>Project Creation – Ops APAC</td>
+            <td><span class="trigger-badge trigger-watch">Watch Event</span></td>
+            <td><span class="badge badge-teal">APAC</span></td>
+            <td>Watches Marketer project creation; auto-creates paired Operations project from APAC Ops template; conditionally adds SFDC tracking tasks</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S4</span></td>
+            <td>Project Creation – Ops AMER</td>
+            <td><span class="trigger-badge trigger-watch">Watch Event</span></td>
+            <td><span class="badge badge-blue">AMER</span></td>
+            <td>Watches Marketer project creation; auto-creates paired Operations project from AMER Ops template; conditionally adds SFDC tracking tasks</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-title">Webhook Scenarios (S5–S19)</div>
+    <div class="table-wrap">
+      <table class="scenario-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Scenario Name</th>
+            <th>Trigger</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="scenario-id">S5</span></td>
+            <td>Targeting – Copy from Last</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Pulls targeting data from most recent request by same marketer; populates targeting fields; marks Targeting task complete</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S6</span></td>
+            <td>Targeting – Copy from Specific</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Copies targeting from a specific Request ID provided by the marketer; validates the ID exists; marks Targeting task complete</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S7</span></td>
+            <td>Targeting – Add Now Submission</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Receives inline targeting data from the form; saves region-specific fields to WF custom fields; marks Targeting task complete</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S8</span></td>
+            <td>Targeting – Provide Later Complete</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Triggered when marketer completes the deferred Targeting task; syncs all targeting fields; updates Workfront Planning record</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S9</span></td>
+            <td>Content – Copy from Last</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Copies content.js from most recent request; attaches new document version to Content task; marks Content task complete</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S10</span></td>
+            <td>Content – Copy from Specific</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Copies content.js from specified Request ID; validates document existence; attaches to Content task; marks complete</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S11</span></td>
+            <td>Content – Add Now Submission</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Receives all CTA content (1–5), assembles content.js JSON, attaches as WF Document to Content task; marks task complete</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S12</span></td>
+            <td>Content – Provide Later Complete</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Triggered on Content task completion; assembles content.js from WF fields; attaches document; advances workflow</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S13</span></td>
+            <td>Validation Summary Builder</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Reads content.js; calls Adobe I/O validationSummary; writes results back to content.js; sends Validation email notification</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S14</span></td>
+            <td>Email Governance Assignment</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Assigns Email Governance task; sends notification email to governance team; records assignment in Planning</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S15</span></td>
+            <td>Email Governance Complete</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Triggered on Governance task completion; calls overAllSummary I/O action; advances project to Pre-Build phase</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S16</span></td>
+            <td>Overview Summary Builder</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Calls overviewSummary Adobe I/O action; populates overview section of content.js; sends Pre-Build confirmation email</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S17</span></td>
+            <td>MCZ Sync Object Builder</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Triggered on Pre-Build task 100%; calls mczSyncObject I/O action; assembles 77-token sync payload; stores in content.js</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S18</span></td>
+            <td>SnapLogic MCZ Provisioning</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Sends content.js document ID to SnapLogic webhook; SnapLogic calls Marketo API; provisions tokens in Program Shell</td>
+          </tr>
+          <tr>
+            <td><span class="scenario-id">S19</span></td>
+            <td>MCZ Response Processor</td>
+            <td><span class="trigger-badge trigger-webhook">Webhook</span></td>
+            <td>Calls processResponse I/O action with SnapLogic response; updates content.js; sends Final MCZ Build notification email</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Project Templates -->
+    <div class="sub-title" style="margin-top:36px;">Project Templates (4)</div>
+    <div class="tools-grid" style="grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));">
+      <div class="tool-card" style="--card-accent: var(--wf-blue);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="font-size:16px; color:var(--wf-blue);">📄</div>
+          <div><div class="tool-type">Marketer Project</div><h3>Email Blast – AMER</h3></div>
+        </div>
+        <div class="tag-list"><span class="tag">INF Managed</span><span class="tag">AMER Region</span><span class="tag">Email Blast</span></div>
+      </div>
+      <div class="tool-card" style="--card-accent: var(--accent-teal);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="font-size:16px; color:var(--accent-teal);">📄</div>
+          <div><div class="tool-type">Marketer Project</div><h3>Email Blast – APAC</h3></div>
+        </div>
+        <div class="tag-list"><span class="tag">INF Managed</span><span class="tag">APAC Region</span><span class="tag">Email Blast</span></div>
+      </div>
+      <div class="tool-card" style="--card-accent: var(--accent-orange);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="font-size:16px; color:var(--accent-orange);">📰</div>
+          <div><div class="tool-type">Marketer Project</div><h3>Newsletter – AMER</h3></div>
+        </div>
+        <div class="tag-list"><span class="tag">INF Managed</span><span class="tag">AMER Region</span><span class="tag">Newsletter</span></div>
+      </div>
+      <div class="tool-card" style="--card-accent: var(--accent-purple);">
+        <div class="tool-card-header">
+          <div class="tool-icon" style="font-size:16px; color:var(--accent-purple);">📰</div>
+          <div><div class="tool-type">Marketer Project</div><h3>Newsletter – APAC</h3></div>
+        </div>
+        <div class="tag-list"><span class="tag">INF Managed</span><span class="tag">APAC Region</span><span class="tag">Newsletter</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── SECTION: ADOBE I/O ── -->
+  <section id="io-actions">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(179,79,186,0.15);">☁️</div>
+      <div>
+        <h2>Adobe I/O Runtime Actions</h2>
+        <div class="section-desc">5 stateless serverless actions under the <code style="color:var(--io-magenta);">fusion-dev</code> package</div>
+      </div>
+    </div>
+
+    <div class="info-box" style="background:rgba(179,79,186,0.08); border-color:rgba(179,79,186,0.25); color:#d0a8d8;">
+      <strong>Auth:</strong> All actions require <code>require-adobe-auth: true</code> &nbsp;|&nbsp;
+      <strong>Stage NS:</strong> <code>23294-dxcampaignautomation-stage</code> &nbsp;|&nbsp;
+      <strong>Prod NS:</strong> <code>14257-918erinrhinoceros</code>
+    </div>
+
+    <div class="io-actions-grid">
+
+      <div class="io-card">
+        <div class="fn-name">validationSummary</div>
+        <p>Reads content.js fields and validates all 7 rules (SFDC Campaign ID, Preview Text length, Subject length, CTA URLs, Banner Image URL, etc.). Returns structured validation pass/fail report written back to content.js.</p>
+        <div class="endpoint-row">
+          <span class="env-pill env-stage">Stage</span>
+          <span class="endpoint-url">23294-dxcampaignautomation-stage/fusion-dev/validationSummary</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="env-pill env-prod">Prod</span>
+          <span class="endpoint-url">14257-918erinrhinoceros/fusion-dev/validationSummary</span>
+        </div>
+      </div>
+
+      <div class="io-card">
+        <div class="fn-name">overAllSummary</div>
+        <p>Aggregates validation results, targeting data, and content metadata into a comprehensive campaign summary object. Called after Email Governance completion to finalize quality gate.</p>
+        <div class="endpoint-row">
+          <span class="env-pill env-stage">Stage</span>
+          <span class="endpoint-url">23294-dxcampaignautomation-stage/fusion-dev/overAllSummary</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="env-pill env-prod">Prod</span>
+          <span class="endpoint-url">14257-918erinrhinoceros/fusion-dev/overAllSummary</span>
+        </div>
+      </div>
+
+      <div class="io-card">
+        <div class="fn-name">overviewSummary</div>
+        <p>Generates a human-readable campaign overview section in content.js. Summarizes campaign purpose, targeting scope, content structure, and approval status. Used in Pre-Build confirmation email.</p>
+        <div class="endpoint-row">
+          <span class="env-pill env-stage">Stage</span>
+          <span class="endpoint-url">23294-dxcampaignautomation-stage/fusion-dev/overviewSummary</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="env-pill env-prod">Prod</span>
+          <span class="endpoint-url">14257-918erinrhinoceros/fusion-dev/overviewSummary</span>
+        </div>
+      </div>
+
+      <div class="io-card">
+        <div class="fn-name">mczSyncObject</div>
+        <p>Builds the complete MCZ Sync Object — a structured JSON payload mapping all 77 Marketo tokens from Planning data, SFDC tracking values, and content.js fields. POI-prefixed token naming applied here.</p>
+        <div class="endpoint-row">
+          <span class="env-pill env-stage">Stage</span>
+          <span class="endpoint-url">23294-dxcampaignautomation-stage/fusion-dev/mczSyncObject</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="env-pill env-prod">Prod</span>
+          <span class="endpoint-url">14257-918erinrhinoceros/fusion-dev/mczSyncObject</span>
+        </div>
+      </div>
+
+      <div class="io-card">
+        <div class="fn-name">processResponse</div>
+        <p>Handles SnapLogic's Marketo provisioning response. Parses token creation status, writes final sync result back to content.js as a new document version, and triggers the Final MCZ Build notification.</p>
+        <div class="endpoint-row">
+          <span class="env-pill env-stage">Stage</span>
+          <span class="endpoint-url">23294-dxcampaignautomation-stage/fusion-dev/processResponse</span>
+        </div>
+        <div class="endpoint-row">
+          <span class="env-pill env-prod">Prod</span>
+          <span class="endpoint-url">14257-918erinrhinoceros/fusion-dev/processResponse</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- content.js -->
+    <div class="sub-title" style="margin-top:36px;">content.js — Campaign JSON Document</div>
+    <div style="background:#181818; border:1px solid var(--adobe-border); border-radius:10px; padding:24px;">
+      <div style="font-size:13px; color:var(--adobe-muted); margin-bottom:16px;">Versioned JSON document attached to the Content task in Workfront as a WF Document. Serves as the single source of truth for all campaign data flowing through the system.</div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:10px;">
+        <div class="planning-card" style="border-left-color: var(--io-magenta);"><h4>Intake Metadata</h4><p>Region, Sub-Region, Country, POI, Send Date, Requesting Team</p></div>
+        <div class="planning-card" style="border-left-color: var(--io-magenta);"><h4>CTA Content 1–5</h4><p>Subject, Preview Text, Headline, Body, CTA Text/URL, Images per CTA</p></div>
+        <div class="planning-card" style="border-left-color: var(--io-magenta);"><h4>Targeting Data</h4><p>All region-specific targeting criteria fields populated</p></div>
+        <div class="planning-card" style="border-left-color: var(--io-magenta);"><h4>Enrichment Data</h4><p>PL-enriched lookup values from Planning tables</p></div>
+        <div class="planning-card" style="border-left-color: var(--io-magenta);"><h4>Token Map</h4><p>77 Marketo token key-value pairs, POI-prefixed</p></div>
+        <div class="planning-card" style="border-left-color: var(--io-magenta);"><h4>Validation Summary</h4><p>Pass/fail per validation rule with error messages</p></div>
+        <div class="planning-card" style="border-left-color: var(--io-magenta);"><h4>Overview Summary</h4><p>Human-readable campaign overview and approval status</p></div>
+        <div class="planning-card" style="border-left-color: var(--io-magenta);"><h4>Sync Object Ref</h4><p>Reference to MCZ Sync Object document ID</p></div>
+        <div class="planning-card" style="border-left-color: var(--io-magenta);"><h4>SFDC Data</h4><p>s_rtid, s_iid, Gated/Ungated, Button Type per CTA</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── SECTION: PLANNING ── -->
+  <section id="planning">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(0,168,142,0.15);">🗄️</div>
+      <div>
+        <h2>Workfront Planning Tables</h2>
+        <div class="section-desc">10+ relational tables providing enrichment, lookups, and token management</div>
+      </div>
+    </div>
+
+    <div class="sub-title">Core &amp; Reference Tables</div>
+    <div class="planning-grid">
+      <div class="planning-card core">
+        <h4>Campaign Request Data</h4>
+        <p>Primary table. Stores all intake form data, enriched by PL connections from all lookup tables. The single source of truth for campaign metadata.</p>
+        <span class="pl-badge core-badge">CORE TABLE</span>
+      </div>
+      <div class="planning-card">
+        <h4>Requests</h4>
+        <p>Workfront request records linked to campaign data. Tracks request status and lifecycle stages.</p>
+        <span class="pl-badge">PL Link → Core</span>
+      </div>
+      <div class="planning-card">
+        <h4>Field List</h4>
+        <p>Master field registry for the platform. Documents all 250+ custom fields and their mapping between Workfront, Planning, and content.js.</p>
+      </div>
+      <div class="planning-card">
+        <h4>Tokens (77)</h4>
+        <p>Definition table for all 77 Marketo tokens. Includes token key, CTA section assignment, POI prefix mapping, and default values.</p>
+        <span class="pl-badge">PL Link → Core</span>
+      </div>
+      <div class="planning-card">
+        <h4>Program Shell</h4>
+        <p>Maps POI (Product of Interest) values to their corresponding Marketo program folder structure and naming conventions.</p>
+        <span class="pl-badge">PL Link → Core</span>
+      </div>
+      <div class="planning-card">
+        <h4>POI List</h4>
+        <p>Master list of Products of Interest. Drives token prefix selection, program shell lookup, and taxonomy enforcement.</p>
+        <span class="pl-badge">PL Link → Core</span>
+      </div>
+      <div class="planning-card">
+        <h4>Fiscal</h4>
+        <p>Fiscal year/quarter definitions used for campaign taxonomy naming and reporting segmentation.</p>
+      </div>
+      <div class="planning-card">
+        <h4>Marketo Fields</h4>
+        <p>Marketo-side field definitions. Maps content.js field keys to actual Marketo token names and API field identifiers.</p>
+      </div>
+      <div class="planning-card">
+        <h4>Marketo Field References</h4>
+        <p>Cross-reference table between Workfront custom fields and Marketo token names. Used during sync object assembly.</p>
+      </div>
+      <div class="planning-card">
+        <h4>MCZ Sync Constants</h4>
+        <p>Static configuration values for MCZ sync operations — environment endpoints, API credentials, and global defaults.</p>
+      </div>
+    </div>
+
+    <div class="sub-title" style="margin-top:28px;">Lookup Tables (11) — Auto-Enrichment via PL Connections</div>
+    <div class="planning-grid">
+      <div class="planning-card lookup"><h4>Solutions</h4><p>Adobe product/solution catalog for campaign classification</p></div>
+      <div class="planning-card lookup"><h4>Regions</h4><p>APAC, AMER, EMEA region definitions and routing codes</p></div>
+      <div class="planning-card lookup"><h4>Country</h4><p>Country master list with region-to-country hierarchy mapping</p></div>
+      <div class="planning-card lookup"><h4>Language</h4><p>Supported campaign languages and locale codes</p></div>
+      <div class="planning-card lookup"><h4>MarketArea</h4><p>Market area definitions by region and sub-region</p></div>
+      <div class="planning-card lookup"><h4>Industry</h4><p>Industry vertical taxonomy for targeting classification</p></div>
+      <div class="planning-card lookup"><h4>Sub Region</h4><p>Sub-region hierarchy filtered under primary Region selection</p></div>
+      <div class="planning-card lookup"><h4>Teams</h4><p>APAC, AMER, Email Governance, and Ops team definitions</p></div>
+      <div class="planning-card lookup"><h4>Validation_Types</h4><p>Validation rule definitions and enforcement patterns</p></div>
+      <div class="planning-card lookup"><h4>Users</h4><p>User role mapping for assignment and notification routing</p></div>
+      <div class="planning-card lookup"><h4>Business Unit</h4><p>Business unit definitions for GTM segmentation and tracking</p></div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── SECTION: VALIDATION ── -->
+  <section id="validation">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(45,157,120,0.15);">✅</div>
+      <div>
+        <h2>Validation Rules</h2>
+        <div class="section-desc">7 enforcement rules applied by the validationSummary Adobe I/O action</div>
+      </div>
+    </div>
+
+    <div class="validation-grid">
+      <div class="val-card">
+        <h4>SFDC Campaign ID</h4>
+        <div class="regex">^701[A-Za-z0-9]{15}$</div>
+        <p>Must be 18 characters starting with "701" — standard Salesforce Campaign ID format</p>
+      </div>
+      <div class="val-card">
+        <h4>Preview Text Length</h4>
+        <div class="regex">^.{40,130}$</div>
+        <p>Email preview text must be between 40 and 130 characters for inbox display best practices</p>
+      </div>
+      <div class="val-card">
+        <h4>Subject Line Length</h4>
+        <div class="regex">^.{0,89}$</div>
+        <p>Email subject line must not exceed 89 characters to avoid truncation in most clients</p>
+      </div>
+      <div class="val-card">
+        <h4>Email CTA Link</h4>
+        <div class="regex">^https://.*</div>
+        <p>All CTA URLs must be valid HTTPS links — HTTP or missing protocol will fail validation</p>
+      </div>
+      <div class="val-card">
+        <h4>SFDC Internal Campaign ID</h4>
+        <div class="regex">s_iid format</div>
+        <p>Internal Salesforce campaign identifier format validation — required when SFDC tracking is enabled</p>
+      </div>
+      <div class="val-card">
+        <h4>Banner Image URL</h4>
+        <div class="regex">^https://.*\.(jpg|png|gif|webp)$</div>
+        <p>Banner image URL must be a valid HTTPS URL pointing to a supported image format</p>
+      </div>
+      <div class="val-card">
+        <h4>Marketing Hub URL</h4>
+        <div class="regex">^https://.*adobe\.com.*</div>
+        <p>Marketing Hub links must reference adobe.com domain to enforce content governance standards</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ──────────────────────────── SECTION: NOTIFICATIONS ── -->
+  <section id="notifications">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(20,115,230,0.15);">🔔</div>
+      <div>
+        <h2>Email Notifications</h2>
+        <div class="section-desc">7 automated notifications triggered by Fusion scenarios throughout the campaign lifecycle</div>
+      </div>
+    </div>
+
+    <div class="notif-list">
+      <div class="notif-item">
+        <div class="notif-num">1</div>
+        <div class="notif-body">
+          <h4>New Request Submitted</h4>
+          <p>Sent to requester and team upon successful intake form submission and project creation</p>
+        </div>
+        <div class="notif-trigger">S1 / S2 Watch Event</div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-num">2</div>
+        <div class="notif-body">
+          <h4>Language Task Update</h4>
+          <p>Sent when child request is linked to an existing parent marketer project and language task is assigned</p>
+        </div>
+        <div class="notif-trigger">S1 / S2 (Child Route)</div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-num">3</div>
+        <div class="notif-body">
+          <h4>Validation Summary</h4>
+          <p>Sent to marketer and governance team with full validation report from the validationSummary I/O action</p>
+        </div>
+        <div class="notif-trigger">S13 Webhook</div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-num">4</div>
+        <div class="notif-body">
+          <h4>Assignment to Email Governance</h4>
+          <p>Notifies the Email Governance team (APAC or AMER) that a campaign is ready for their review and approval</p>
+        </div>
+        <div class="notif-trigger">S14 Webhook</div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-num">5</div>
+        <div class="notif-body">
+          <h4>Email Governance Completion</h4>
+          <p>Confirms to the marketer that the Email Governance review is complete and campaign advances to Pre-Build</p>
+        </div>
+        <div class="notif-trigger">S15 Webhook</div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-num">6</div>
+        <div class="notif-body">
+          <h4>Pre-Build Confirmation</h4>
+          <p>Sent to ops team and marketer with campaign overview summary before MCZ token provisioning begins</p>
+        </div>
+        <div class="notif-trigger">S16 Webhook</div>
+      </div>
+      <div class="notif-item">
+        <div class="notif-num">7</div>
+        <div class="notif-body">
+          <h4>Final MCZ Build Notification</h4>
+          <p>Confirms successful Marketo token provisioning; includes sync result details and program shell location</p>
+        </div>
+        <div class="notif-trigger">S19 Webhook</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Campaign Orchestration Platform · Adobe Workfront + Fusion + Planning + I/O Runtime + SnapLogic + <span>Marketo</span> · APAC &amp; AMER
+</footer>
+
+<script>
+  // Smooth scroll + active nav highlight
+  document.querySelectorAll('nav a').forEach(a => {
+    a.addEventListener('click', e => {
+      document.querySelectorAll('nav a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+    });
+  });
+
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('nav a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
